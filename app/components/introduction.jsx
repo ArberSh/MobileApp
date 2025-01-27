@@ -12,6 +12,7 @@ import * as SplashScreen from "expo-splash-screen"; // Import properly
 import { useFonts } from "expo-font";
 import {useNavigation} from "@react-navigation/native"
 
+
 const { height } = Dimensions.get("window");
 
 

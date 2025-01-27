@@ -6,7 +6,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import login from "./components/login"
 import register from './components/register';
-import pagechat from './components/PageChat';
+import pagechat from './components/Tabs/PageChat';
 
 const _layout = () => {
   const [isSplashScreen, setSplashScreen] = useState(true);
