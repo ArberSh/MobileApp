@@ -1,20 +1,23 @@
 import { View, Text, SafeAreaView, Dimensions, StyleSheet, TouchableOpacity } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useFonts } from 'expo-font';
-import { Tabs } from 'expo-router';
+import { Stack } from 'expo-router/stack';
+
 
 const PageChat = () => {
-  const [fontsLoaded] = useFonts({
-    "Poppins-Medium": require("../assets/fonts/Poppins/Poppins-Medium.ttf"),
-    "Poppins-Bold": require("../assets/fonts/Poppins/Poppins-Bold.ttf"),
-  });
+ 
 
   const { height } = Dimensions.get('window'); 
 
   const [dimensions, setDimensions] = useState({
     heightWindow: height,
   });
+  const [bigger,setbigger] = useState(false)
+
+  useEffect(() => {
+    if(dimensions.heightWindow < 700)
+    setbigger(true); 
+  }, [dimensions.heightWindow]);
 
   useEffect(() => {
     const subscription = Dimensions.addEventListener('change', ({ window }) => {
@@ -29,21 +32,6 @@ const PageChat = () => {
   return (
     <SafeAreaView style={[styles.safeArea, { height: dimensions.heightWindow }]}>
       <View style={styles.container}>
-        
-        {/* <View style={[styles.sidebar, { height: dimensions.heightWindow }]}>
-          <View style={styles.sidebarTop}>
-            <Text style={styles.sidebarText}>Logo here</Text>
-            <Ionicons style={styles.icon} name="home" size={32} color="white" />
-            <Ionicons style={styles.icon} name="search" size={32} color="white" />
-            <Ionicons style={styles.icon} name="reader-outline" size={32} color="white" />
-          </View>
-          <View style={styles.sidebarBottom}>
-            <Ionicons style={styles.icon} name="settings" size={32} color="white" />
-            <Ionicons style={styles.icon} name="person-circle" size={32} color="white" />
-          </View>
-        </View> */}
-        <Tabs/>
-        
         <View style={[styles.mainContent, { height: dimensions.heightWindow }]}>
           <Text style={styles.title}>Dashboard</Text>
           <View>
@@ -137,7 +125,7 @@ const PageChat = () => {
                         <Text style={{color:'white',fontWeight:'700',marginHorizontal:20,fontSize:18}}>Create a PowerPoint </Text>
                     </View>
                 </TouchableOpacity>
-                <TouchableOpacity style={{backgroundColor:'black',width:360,height:110,borderRadius:20,marginVertical:10}}>
+                {bigger ? <TouchableOpacity style={{backgroundColor:'black',width:360,height:110,borderRadius:20,marginVertical:10}}>
                     <View style={{padding:12,flexDirection:'row'}}>
                         <View> 
                              <View style={{
@@ -155,8 +143,10 @@ const PageChat = () => {
                         <View>
                         <Text style={{color:'white',fontWeight:'700',marginHorizontal:20,fontSize:18}}>Import DataBase</Text>
                     </View>
-                </TouchableOpacity>
+                </TouchableOpacity> : <></>}
+                
                 </View>
+             
         </View>
       </View>
     </SafeAreaView>
@@ -171,12 +161,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: 'row',
-  },
-  sidebar: {
-    width: '20%',
-    backgroundColor: 'black',
-    justifyContent: 'space-between',
-    paddingVertical: 20,
   },
   sidebarTop: {
     paddingHorizontal: 20,
@@ -193,7 +177,7 @@ const styles = StyleSheet.create({
   },
   mainContent: {
     width: '100%',
-    backgroundColor: '#5d5d5d',
+    backgroundColor: '#2A2C32',
     paddingTop: 30,
     paddingHorizontal: 20,
   },
