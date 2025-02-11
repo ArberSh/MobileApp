@@ -6,13 +6,14 @@ import Introduction from './components/introduction';
 import Login from './components/login';
 import Register from './components/register';
 import PageChat from './components/PageChat';
-import FriendsScreen from './components/Chats'; // Create these
-import AccountScreen from './components/Account'; // Create these
+import FriendsScreen from './components/Chats';
+import AccountScreen from './components/Account'; 
 import SplashScreen from '../SplashScreenView';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Tasks from './components/Tasks';
-import { StatusBar } from 'react-native'; // Change this import
+import { StatusBar } from 'react-native'; 
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import CreateNewChat from './components/CreateNewChat';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -93,6 +94,7 @@ const _layout = () => {
             <Stack.Screen name="login" component={Login} />
             <Stack.Screen name="register" component={Register} />
             <Stack.Screen name="pagechat" component={HomeTabs} />
+            <Stack.Screen name="CreateNewChat" component={CreateNewChat} />
           </Stack.Navigator>
         </NavigationContainer>
       )}
