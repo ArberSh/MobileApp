@@ -29,19 +29,19 @@ const Login = () => {
       <View style={styles.inputContainer}>
         <TextInput
           placeholder="Email"
-          placeholderTextColor="black"
+          placeholderTextColor="gray"
           style={styles.input}
           accessibilityLabel="Enter your email"
         />
         <TextInput
           placeholder="Password"
-          placeholderTextColor="black"
+          placeholderTextColor="gray"
           style={styles.input}
           accessibilityLabel="Enter your password"
         />
         <TextInput
           placeholder="Confirm Password"
-          placeholderTextColor="black"
+          placeholderTextColor="gray"
           style={styles.input}
           accessibilityLabel="Enter your password"
         />
@@ -72,7 +72,7 @@ const Login = () => {
          <Text
          style={{
             fontFamily:'Poppins-Medium',
-            color:'black',
+            color:'white',
             textAlign:'center',
             fontSize:16,
          }}
@@ -104,31 +104,31 @@ const Login = () => {
             <TouchableOpacity
             style={{
                 padding:8,
-                backgroundColor:'#e8fcf6',
+                backgroundColor:'#1E1E1E',
                 borderRadius:4,
                 marginHorizontal:16
             }}
             >
-            <Ionicons name="logo-google" size={32} color="black" />
+            <Ionicons name="logo-google" size={32} color="#00c9bd" />
             </TouchableOpacity><TouchableOpacity
             style={{
                 padding:8,
-                backgroundColor:'#e8fcf6',
+                backgroundColor:'#1E1E1E',
                 borderRadius:4,
                 marginHorizontal:16
             }}
             >
-            <Ionicons name="logo-facebook" size={32} color="black" />
+            <Ionicons name="logo-facebook" size={32} color="#00c9bd" />
             </TouchableOpacity>
             <TouchableOpacity
             style={{
                 padding:8,
-                backgroundColor:'#e8fcf6',
+                backgroundColor:'#1E1E1E',
                 borderRadius:4,
                 marginHorizontal:16
             }}
             >
-            <Ionicons name="logo-apple" size={32} color="black" />
+            <Ionicons name="logo-apple" size={32} color="#00c9bd" />
             </TouchableOpacity>
          </View>
 
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 16,
-    backgroundColor: "#fff",
+    backgroundColor: "black",
   },
   header: {
     marginTop: height / 14,
@@ -157,7 +157,8 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontFamily: "Poppins-Medium",
     marginTop: 10,
-    textAlign:'center'
+    textAlign:'center',
+    color:'white'
   },
   inputContainer: {
     marginTop: 20,
@@ -167,9 +168,9 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins-Medium",
     fontSize: 14,
     padding: 20,
-    backgroundColor: "#e8fcf6",
+    backgroundColor: "#1E1E1E",
     borderRadius: 5,
-    color: "black",
+    color: "white",
     marginTop:20,
     width:'95%'
   },

@@ -32,6 +32,8 @@ const Groups = () => {
         backgroundColor: 'black',
       }} >
       <Account name="Work Team" text="Project discussion" notification='5' image={"https://example.com/group1.jpg"}/>
+      <Account name="Math Team" text="Project discussion"  image={"https://example.com/group1.jpg"}/>
+      <Account name="Biology Team" text="Project discussion" image={"https://example.com/group1.jpg"}/>
       
     </ScrollView>
     <TouchableOpacity 

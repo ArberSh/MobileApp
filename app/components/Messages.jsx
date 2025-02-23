@@ -1,11 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, Dimensions } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Dimensions, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import Account from "./Repeats/account";
 import Groups from './Groups';
 import Friends from "./Friends";
+import { TextInput } from "react-native-gesture-handler";
 
 
 const Chats = () => {
@@ -18,8 +19,33 @@ const Chats = () => {
         <Text style={{color: "white",
     fontSize: 32,
     fontFamily: "Poppins-Bold",}}>
-          Chats
+          Messages
         </Text>
+        <View style={{
+  flexDirection: 'row',
+  backgroundColor: '#1E1E1E',
+  alignItems: 'center',
+  paddingHorizontal: 12,
+  borderRadius: 8, 
+  height: 40, 
+  height:50
+}}>
+  <TextInput
+    style={{
+      flex: 1, 
+      color: 'white',
+      height: '100%',
+      paddingVertical: 10,
+      fontSize:16
+    }}
+          maxLength={30}
+          placeholder="Search to message..."
+          placeholderTextColor='gray'
+          />
+          <TouchableOpacity>
+            <Ionicons name="search-outline" color='white' size={20}/>
+          </TouchableOpacity>
+        </View>
       </View>
       <Tab.Navigator
         screenOptions={{

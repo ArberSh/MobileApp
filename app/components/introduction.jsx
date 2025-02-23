@@ -39,7 +39,7 @@ const Login = () => {
   }
 
   return (
-     <SafeAreaView onLayout={onLayout} style={{ backgroundColor: "white", height: "100%" }}>
+     <SafeAreaView onLayout={onLayout} style={{ backgroundColor: "black", height: "100%" }}>
       <View>
         <ImageBackground
           style={{
@@ -47,7 +47,7 @@ const Login = () => {
             marginTop: 20,
           }}
           resizeMode="contain"
-          source={require("../assets/img.png")}
+          source={require("../assets/img1.png")}
         />
         <View
           style={{
@@ -68,7 +68,7 @@ const Login = () => {
           <Text
             style={{
               fontSize: 16,
-              color: "black",
+              color: "white",
               fontFamily: "Poppins-Medium",
               textAlign: "center",
             }}
@@ -110,7 +110,7 @@ const Login = () => {
           <TouchableOpacity 
           onPress={() => navigation.navigate("register")}
             style={{
-              backgroundColor: "white",
+              backgroundColor: "black",
               paddingVertical: 6,
               paddingHorizontal: 8,
               width: "46%",
@@ -120,7 +120,7 @@ const Login = () => {
             <Text
               style={{
                 fontFamily: "Poppins-Medium",
-                color: "black",
+                color: "white",
                 fontSize: 20,
                 textAlign: "center",
               }}

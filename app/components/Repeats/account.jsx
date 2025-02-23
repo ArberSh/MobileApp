@@ -1,12 +1,14 @@
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { use, useEffect, useState } from 'react'
+import { useNavigation } from '@react-navigation/native'
 
 const Account = ({ name, image, text , notification}) => {
   const [imageError, setImageError] = useState(false)
   
   const randomColor = `hsl(${Math.random() * 360}, 50%, 50%)`
   const [Notification,hasNotification] = useState(false)
-  
+      const navigation = useNavigation();
+
   useEffect(()=>{
     if(notification !== null){
         hasNotification(true)
@@ -17,6 +19,7 @@ const Account = ({ name, image, text , notification}) => {
   return (
     <View>
       <TouchableOpacity
+      onPress={() => navigation.navigate("ChatRoom")}
         style={{
           backgroundColor: "black",
           width: 360,
@@ -97,6 +100,7 @@ const Account = ({ name, image, text , notification}) => {
   )
 }
 
-export default Account
-
 const styles = StyleSheet.create({})
+
+
+export default Account

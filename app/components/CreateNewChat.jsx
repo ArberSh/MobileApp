@@ -1,14 +1,15 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useState } from 'react'
-import { ScrollView } from 'react-native-gesture-handler'
+import { ScrollView, TextInput } from 'react-native-gesture-handler'
 import Account from './Repeats/account'
 import Checkbox from 'expo-checkbox';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { useNavigation } from '@react-navigation/native';
 
 const CreateNewChat = () => {
-  // Track selected accounts using an object with account identifiers
   const [selectedAccounts, setSelectedAccounts] = useState({});
+  const navigation = useNavigation();
 
-  // Handle checkbox toggle for specific account
   const handleCheckboxToggle = (accountId) => {
     setSelectedAccounts(prev => ({
       ...prev,
@@ -22,17 +23,35 @@ const CreateNewChat = () => {
       flex: 1,
       backgroundColor: 'black'
     }}>
-      <View>
+      <View style={{
+        flexDirection:'row',
+        alignItems:'center',
+        paddingHorizontal:20,
+        paddingVertical:10
+      }}>
+        <TouchableOpacity 
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
+          <Ionicons name="arrow-back" size={28} color="#00c9bd" />
+        </TouchableOpacity>
         <Text style={{
           color: "white",
-          fontSize: 32,
+          fontSize: 26,
           fontFamily: "Poppins-Bold",
           paddingHorizontal: 20
         }}>
-          Create Chat with...
+          Create a new chat
         </Text>
       </View>
+      <View>
+        <View style={{marginHorizontal:20,flexDirection:'row',alignItems:'center',borderColor:'#00c9bd',borderWidth:1,borderRadius:6,padding:6}}>
+          <Ionicons name="person" size={30} color="#00c9bd"></Ionicons>
+        <TextInput style={{paddingHorizontal:10,color:'white',}}></TextInput>
+        </View>
+      </View>
       <ScrollView style={{
+        width:'100%',
         paddingHorizontal: 10,
         paddingBottom: 80,
       }}>
@@ -64,10 +83,10 @@ const CreateNewChat = () => {
 
         {[
           { id: 'arber', name: "Arber",  image: "https://wallpapers.com/images/hd/oscar-zahn-skeleton-headphones-unique-cool-pfp-rboah21ctf7m37o0.jpg" },
-          { id: 'makina', name: "Makina",  image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSVmRIWVvmruhUAHnOsuPJPocXeyqGyX4TcPQ&s" },
-          { id: 'helikopter', name: "Helikopter",  image: "https://coin-images.coingecko.com/nft_contracts/images/15175/large/chill-guy-pfp.png?1732114825" },
-          { id: 'ligma', name: "Ligma" },
-          { id: 'karen', name: "Karen" },
+          { id: 'user1', name: "user1",  image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSVmRIWVvmruhUAHnOsuPJPocXeyqGyX4TcPQ&s" },
+          { id: 'user2', name: "user2" },
+          { id: 'user4', name: "user4" },
+          { id: 'karen', name: "user11" },
         ].map((account) => (
           <View key={account.id} style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Account {...account} />
@@ -84,10 +103,9 @@ const CreateNewChat = () => {
   )
 }
 
-const styles = StyleSheet.create({
+export const styles = StyleSheet.create({
   checkbox: {
-    marginLeft: 10,
-    marginRight: 20
+    paddingRight:100
   }
 });
 
