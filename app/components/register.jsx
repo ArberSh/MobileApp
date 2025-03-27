@@ -4,9 +4,7 @@ import { useFonts } from "expo-font";
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/core';
 
-
 const { height } = Dimensions.get("window");
-
 
 const Login = () => {
   const [fontsLoaded] = useFonts({
@@ -17,8 +15,12 @@ const Login = () => {
   if (!fontsLoaded) {
     return <Text>Loading...</Text>; // Display a fallback UI while fonts load
   }
-    const navigation = useNavigation();
+  const navigation = useNavigation();
 
+  // Navigate directly to the pagechat screen
+  const handleLogin = () => {
+    navigation.navigate('pagechat');
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -53,7 +55,7 @@ const Login = () => {
         backgroundColor:'#00c9bd',
         marginVertical:24,
         borderRadius:8,
-      }}onPress={()=>{navigation.navigate('pagechat')}}>
+      }} onPress={handleLogin}>
          <Text
          style={{
             fontFamily:'Poppins-Bold',

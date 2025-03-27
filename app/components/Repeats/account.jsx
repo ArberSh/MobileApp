@@ -2,7 +2,7 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { use, useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
 
-const Account = ({ name, image, text , notification}) => {
+const Account = ({ name, image, text , notification,status}) => {
   const [imageError, setImageError] = useState(false)
   
   const randomColor = `hsl(${Math.random() * 360}, 50%, 50%)`
@@ -19,14 +19,15 @@ const Account = ({ name, image, text , notification}) => {
   return (
     <View>
       <TouchableOpacity
-      onPress={() => navigation.navigate("ChatRoom")}
-        style={{
-          backgroundColor: "black",
-          width: 360,
-          borderRadius: 20,
-          paddingVertical: 10,
-        }}
-      >
+  onPress={() => navigation.navigate("ChatRoom")}
+  style={{
+    backgroundColor: "#2B2D31",
+    borderRadius: 20,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#5E5E5E"
+  }}
+>
         <View style={{ paddingVertical: 10, flexDirection: "row", alignItems: "center" }}>
           <View>
             {(!image || imageError) ? (

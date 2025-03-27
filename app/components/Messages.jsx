@@ -21,41 +21,19 @@ const Chats = () => {
     fontFamily: "Poppins-Bold",}}>
           Messages
         </Text>
-        <View style={{
-  flexDirection: 'row',
-  backgroundColor: '#1E1E1E',
-  alignItems: 'center',
-  paddingHorizontal: 12,
-  borderRadius: 8, 
-  height: 40, 
-  height:50
-}}>
-  <TextInput
-    style={{
-      flex: 1, 
-      color: 'white',
-      height: '100%',
-      paddingVertical: 10,
-      fontSize:16
-    }}
-          maxLength={30}
-          placeholder="Search to message..."
-          placeholderTextColor='gray'
-          />
-          <TouchableOpacity>
-            <Ionicons name="search-outline" color='white' size={20}/>
-          </TouchableOpacity>
-        </View>
+        
       </View>
+      
       <Tab.Navigator
         screenOptions={{
           tabBarStyle: styles.tabBar,
           tabBarLabelStyle: styles.tabLabel,
           tabBarIndicatorStyle: styles.indicator,
-          tabBarActiveTintColor: '#00c9bd',
+          tabBarActiveTintColor: 'white',
           tabBarInactiveTintColor: 'gray',
         }}
       >
+        
         <Tab.Screen 
           name="Friends" 
           component={Friends}
@@ -74,10 +52,10 @@ const Chats = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "black",
+    backgroundColor: "#1C1D20",
   },
   tabBar: {
-    backgroundColor: '#000',
+    backgroundColor: '#1C1D20',
     elevation: 0,
     shadowOpacity: 0,
     borderBottomWidth: 0,
@@ -88,7 +66,7 @@ const styles = StyleSheet.create({
     textTransform: 'capitalize',
   },
   indicator: {
-    backgroundColor: '#00c9bd',
+    backgroundColor: 'white',
     height: 2,
   },
 });
