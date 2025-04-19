@@ -1,22 +1,23 @@
 import React from 'react';
-import { SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView, StyleSheet,  TextInput, TouchableOpacity, View } from 'react-native';
 import { useFonts } from "expo-font";
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/core';
+import Text from './CustomText';
+
 
 
 const Login = () => {
   const [fontsLoaded] = useFonts({
-    "Poppins-Medium": require("../assets/fonts/Poppins/Poppins-Medium.ttf"),
-    "Poppins-Bold": require("../assets/fonts/Poppins/Poppins-Bold.ttf"),
+    "Lexend-Medium": require("../assets/fonts/Lexend/static/Lexend-Medium.ttf"),
+    "Lexend-Bold": require("../assets/fonts/Lexend/static/Lexend-Bold.ttf"),
   });
 
   if (!fontsLoaded) {
     return <Text>Loading...</Text>; // Display a fallback UI while fonts load
   }
 
-    const navigation = useNavigation();
-
+  const navigation = useNavigation();
 
   return (
     <SafeAreaView style={styles.container}>
@@ -39,103 +40,103 @@ const Login = () => {
         />
       </View>
       <View>
-<TouchableOpacity>
-      <Text
-      style={{
-          fontFamily:'Poppins-Medium',
-          fontSize:16,
-          color:'#00c9bd',
-          alignSelf:'flex-end',
-          marginTop:12,
-        }}
-        >
-        Forgot your Password?
-      </Text>
-</TouchableOpacity>
-      <TouchableOpacity style={{
-        padding:16,
-        backgroundColor:'#00c9bd',
-        marginVertical:24,
-        borderRadius:8,
-      }}>
-         <Text
-         style={{
-            fontFamily:'Poppins-Bold',
-            color:'white',
-            textAlign:'center',
-            fontSize:20,
-         }}
-         >Sign in</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={{
-        padding:16,
-        width:'60%',
-        alignSelf:'center'
-      }}>
-         <Text
-         style={{
-            fontFamily:'Poppins-Medium',
-            color:'white',
-            textAlign:'center',
-            fontSize:16,
-         }}
-         onPress={() => navigation.navigate("register")}
-         >Create new account</Text>
-      </TouchableOpacity>
+        <TouchableOpacity>
+          <Text
+            style={{
+              fontFamily:'Lexend-Medium',
+              fontSize:16,
+              color:'#00c9bd',
+              alignSelf:'flex-end',
+              marginTop:12,
+            }}
+          >
+            Forgot your Password?
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={{
+          padding:16,
+          backgroundColor:'#00c9bd',
+          marginVertical:24,
+          borderRadius:8,
+        }}>
+          <Text
+            style={{
+              fontFamily:'Lexend-Bold',
+              color:'white',
+              textAlign:'center',
+              fontSize:20,
+            }}
+          >Sign in</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={{
+          padding:16,
+          width:'60%',
+          alignSelf:'center'
+        }}>
+          <Text
+            style={{
+              fontFamily:'Lexend-Medium',
+              color:'white',
+              textAlign:'center',
+              fontSize:16,
+            }}
+            onPress={() => navigation.navigate("register")}
+          >Create new account</Text>
+        </TouchableOpacity>
 
-      <View 
-        style={{
+        <View 
+          style={{
             marginVertical:16
-        }}
-      >
-      <Text
-         style={{
-            fontFamily:'Poppins-Medium',
-            color:'#00c9bd',
-            textAlign:'center',
-            fontSize:16,
-         }}
-         >Or continue with</Text>
-      </View>
-         <View
-         style={{
+          }}
+        >
+          <Text
+            style={{
+              fontFamily:'Lexend-Medium',
+              color:'#00c9bd',
+              textAlign:'center',
+              fontSize:16,
+            }}
+          >Or continue with</Text>
+        </View>
+        <View
+          style={{
             marginTop:8,
             flexDirection:'row',
             justifyContent: 'center',
-         }}
-         >
-            <TouchableOpacity
+          }}
+        >
+          <TouchableOpacity
             style={{
-                padding:8,
-                backgroundColor:'#1E1E1E',
-                borderRadius:4,
-                marginHorizontal:16
+              padding:8,
+              backgroundColor:'#1E1E1E',
+              borderRadius:4,
+              marginHorizontal:16
             }}
-            >
+          >
             <Ionicons name="logo-google" size={32} color="#00c9bd" />
-            </TouchableOpacity><TouchableOpacity
+          </TouchableOpacity>
+          <TouchableOpacity
             style={{
-                padding:8,
-                backgroundColor:'#1E1E1E',
-                borderRadius:4,
-                marginHorizontal:16
+              padding:8,
+              backgroundColor:'#1E1E1E',
+              borderRadius:4,
+              marginHorizontal:16
             }}
-            >
+          >
             <Ionicons name="logo-facebook" size={32} color="#00c9bd" />
-            </TouchableOpacity>
-            <TouchableOpacity
+          </TouchableOpacity>
+          <TouchableOpacity
             style={{
-                padding:8,
-                backgroundColor:'#1E1E1E',
-                borderRadius:4,
-                marginHorizontal:16
+              padding:8,
+              backgroundColor:'#1E1E1E',
+              borderRadius:4,
+              marginHorizontal:16
             }}
-            >
+          >
             <Ionicons name="logo-apple" size={32} color="#00c9bd" />
-            </TouchableOpacity>
-         </View>
-
-          </View>
+          </TouchableOpacity>
+        </View>
+      </View>
     </SafeAreaView>
   );
 };
@@ -153,12 +154,12 @@ const styles = StyleSheet.create({
   },
   title: {
     color: "#00c9bd",
-    fontFamily: "Poppins-Bold",
+    fontFamily: "Lexend-Bold",
     fontSize: 30,
   },
   subtitle: {
     fontSize: 24,
-    fontFamily: "Poppins-Medium",
+    fontFamily: "Lexend-Medium",
     marginTop: 10,
     color:'white'
   },
@@ -167,7 +168,7 @@ const styles = StyleSheet.create({
     alignItems:'center'
   },
   input: {
-    fontFamily: "Poppins-Medium",
+    fontFamily: "Lexend-Medium",
     fontSize: 14,
     padding: 20,
     backgroundColor: "#1E1E1E",
@@ -177,5 +178,6 @@ const styles = StyleSheet.create({
     width:'95%'
   },
 });
+
 
 export default Login;

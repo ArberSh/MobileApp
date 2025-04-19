@@ -1,28 +1,59 @@
-import React, { useState } from 'react';
-import { Text, View, ScrollView, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import React, { useState, useContext, useMemo } from 'react';
+import { View, ScrollView, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import Account from "./Repeats/account";
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { TextInput } from 'react-native-gesture-handler';
+import { FriendsContext } from '../components/FriendsContext'; // Import the context
+import Text from './CustomText';
 
-const Friends = ({ drawerNavigation }) => {
+// Color generation utility - creates a deterministic color from a string
+const generateConsistentColor = (str) => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const hue = hash % 360;
+  return `hsl(${hue}, 50%, 50%)`;
+};
+
+const Friends = ({ drawerNavigation, onSelectChat }) => {
   const navigation = useNavigation();
-  const [showFilters, setShowFilters] = useState(false)
-  const [selectedFilter, setSelectedFilter] = useState('All')
+  const [showFilters, setShowFilters] = useState(false);
+  const [selectedFilter, setSelectedFilter] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
   const screenHeight = Dimensions.get('window').height;
+  
+  // Use the friends data from context instead of local state
+  const { friends } = useContext(FriendsContext);
 
-  const friendsData = [
-    { name: "Aleks", status: 'Online', text: "Aleks: Hey I need your help", notification: '2', image: "https://i.pinimg.com/originals/dc/4f/40/dc4f402448b8b309879645aefa1dde46.jpg" },
-    { name: "Mario", status: 'Offline', text: "You: Actually i like it", image: "https://i.pinimg.com/236x/68/31/12/68311248ba2f6e0ba94ff6da62eac9f6.jpg" },
-    { name: "Arber", status: 'Offline', text: "Arber: Hello, How are you", notification: '2', image: "https://wallpapers.com/images/hd/oscar-zahn-skeleton-headphones-unique-cool-pfp-rboah21ctf7m37o0.jpg" },
-    { name: "John", status: 'Offline', text: "You: yo how did you do that", notification: '2', image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSVmRIWVvmruhUAHnOsuPJPocXeyqGyX4TcPQ&s" },
-    { name: "Kevin", status: 'Online', text: "Kevin: What's up ", image: "https://fiverr-res.cloudinary.com/images/q_auto,f_auto/gigs2/237140455/original/a3ff1f2f90f5d52cec530bc529fbcf169a6cb9d6/draw-a-simple-aesthetics-pfp-or-lock-screen-image-for-you.png" },
-    { name: "Maria", status: 'Online', text: "You: yo how did you do that", image: "https://i.pinimg.com/originals/dc/4f/40/dc4f402448b8b309879645aefa1dde46.jpg" },
-  ]
+  // Create color map once and reuse it to ensure consistent colors
+  const friendColorMap = useMemo(() => {
+    const colorMap = {};
+    friends.forEach(friend => {
+      // Generate a consistent color using the friend's ID
+      colorMap[friend.id] = generateConsistentColor(friend.id);
+    });
+    return colorMap;
+  }, [friends]); // Dependency on friends array, but will only change if friends list changes
 
-  const filteredFriends = friendsData.filter(friend => {
-    if (selectedFilter === 'All') return true;
-    return friend.status === selectedFilter;
+  // Filter friends based on selected filter and search query
+  const filteredFriends = friends.filter(friend => {
+    // Apply status filter
+    if (selectedFilter === 'All') {
+      // Just apply search filter
+    } else if (selectedFilter === 'Online' && !friend.isOnline) {
+      return false;
+    } else if (selectedFilter === 'Offline' && friend.isOnline) {
+      return false;
+    }
+    
+    // Apply search filter if there is a search query
+    if (searchQuery) {
+      return friend.name.toLowerCase().includes(searchQuery.toLowerCase());
+    }
+    
+    return true;
   });
 
   const handleFriendSelect = (friend) => {
@@ -30,18 +61,11 @@ const Friends = ({ drawerNavigation }) => {
     if (onSelectChat) {
       onSelectChat(friend);
     }
-    
-    // Close the drawer
-    if (drawerNavigation && drawerNavigation.closeDrawer) {
-      drawerNavigation.closeDrawer();
-    } else {
-      // If not in drawer, navigate normally
-      navigation.navigate('ChatRoom', { 
-        name: friend.name,
-        image: friend.photo,
-        status: friend.status
-      });
-    }
+  };
+
+  // Function to get user avatar color consistently
+  const getFriendAvatarColor = (friend) => {
+    return friendColorMap[friend.id] || 'gray'; // Fallback color if ID not found
   };
 
   return (
@@ -58,7 +82,6 @@ const Friends = ({ drawerNavigation }) => {
           backgroundColor: '#5E5E5E',
           width: '84%',
           borderRadius: 15,
-
         }}>
           <TextInput
             style={{
@@ -72,16 +95,19 @@ const Friends = ({ drawerNavigation }) => {
             }}
             maxLength={30}
             placeholder="Search Friends..."
-            placeholderTextColor='white' />
+            placeholderTextColor='white'
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
         </View>
-        <TouchableOpacity style={[styles.filterButton,
-        showFilters && styles.activeFilterButton
-        ]}
+        <TouchableOpacity 
+          style={[styles.filterButton, showFilters && styles.activeFilterButton]}
           onPress={() => setShowFilters(!showFilters)}
         >
           <Ionicons name="filter-outline" color='white' size={24} />
         </TouchableOpacity>
       </View>
+      
       {showFilters && (
         <View style={{
           flexDirection: 'row',
@@ -119,25 +145,44 @@ const Friends = ({ drawerNavigation }) => {
           </TouchableOpacity>
         </View>
       )}
+      
       <View style={[styles.contentWrapper]}>
-        <ScrollView contentContainerStyle={styles.content}>
-          {filteredFriends.map((friend, index) => (
-            <TouchableOpacity key={index} onPress={() => handleFriendSelect(friend)}>
-              <Account
-                name={friend.name}
-                text={friend.text}
-                notification={friend.notification}
-                image={friend.image}
-                status={friend.status}
-              />
-            </TouchableOpacity>
-          ))}
+        <ScrollView 
+          contentContainerStyle={styles.content}
+        >
+          {filteredFriends.length > 0 ? (
+            filteredFriends.map((friend, index) => (
+              <TouchableOpacity 
+                key={index} 
+                onPress={() => handleFriendSelect(friend)}
+              >
+                <Account
+                  name={friend.name}
+                  text={friend.bio || "No bio available"}
+                  notification={friend.notification || 0}
+                  image={friend.profilePicture}
+                  status={friend.isOnline ? 'online' : 'offline'}
+                  avatarColor={getFriendAvatarColor(friend)} // Pass consistent color to Account component
+                />
+              </TouchableOpacity>
+            ))
+          ) : (
+            <View style={styles.noFriendsContainer}>
+              <Ionicons name="people-outline" size={64} color="#5E5E5E" />
+              <Text style={styles.noFriendsText}>No friends found</Text>
+              <Text style={styles.noFriendsSubtext}>
+                {searchQuery ? 
+                  "Try a different search term or filter" : 
+                  "Add friends to start chatting"}
+              </Text>
+            </View>
+          )}
         </ScrollView>
       </View>
 
       <TouchableOpacity
         style={styles.fab}
-        onPress={() => { navigation.navigate('CreateNewChat') }}
+        onPress={() => navigation.navigate('CreateNewChat')}
       >
         <View style={styles.fabContent}>
           <Ionicons name="add-outline" size={28} color="white" />
@@ -155,9 +200,9 @@ const styles = StyleSheet.create({
   content: {
     backgroundColor: '#2B2D31',
     paddingHorizontal: 10,
-    paddingBottom: 20, // Add extra padding at the bottom
+    paddingBottom: 20,
+    minHeight: 300, // Ensure there's enough space for the no friends message
   },
-
   contentWrapper: {
     flex: 1,
     marginHorizontal: 10,
@@ -165,23 +210,22 @@ const styles = StyleSheet.create({
     padding: 4,
     borderRadius: 16
   },
-
   fab: {
     position: 'absolute',
     bottom: 20,
     right: 20,
-    backgroundColor: '#00c9bd',
+    backgroundColor: '#1E1E1E',
     width: 56,
     height: 56,
     borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 4, // Android shadow
-    shadowColor: '#000', // iOS shadow
+    elevation: 4,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
-    zIndex: 1, // Ensure it stays on top
+    zIndex: 1,
   },
   fabContent: {
     flex: 1,
@@ -212,8 +256,25 @@ const styles = StyleSheet.create({
   selectedFilter: {
     backgroundColor: '#5E5E5E',
     color: 'black'
+  },
+  noFriendsContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 60,
+  },
+  noFriendsText: {
+    color: 'white',
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginTop: 16,
+  },
+  noFriendsSubtext: {
+    color: '#9e9e9e',
+    fontSize: 16,
+    marginTop: 8,
+    textAlign: 'center',
+    paddingHorizontal: 30,
   }
-
 });
 
 export default Friends;

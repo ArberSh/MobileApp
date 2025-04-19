@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { 
   StyleSheet, 
-  Text, 
   View, 
   TouchableOpacity, 
   TextInput, 
@@ -21,6 +20,8 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
+import Text from './CustomText';
+
 
 const { width, height } = Dimensions.get('window');
 
@@ -262,7 +263,7 @@ const ChatRoom = () => {
       ]} 
       {...panResponder.panHandlers}
     >
-      <StatusBar backgroundColor="#1a1a1a" barStyle="light-content" />
+      <StatusBar backgroundColor="#2B2D31" barStyle="light-content" />
       
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : null}
@@ -519,20 +520,20 @@ const ChatRoom = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: 'black',
+    backgroundColor: '#1E1E1E',
   },
   keyboardVisible: {
-    backgroundColor: 'black',
+    backgroundColor: '#1E1E1E',
   },
   container: {
     flex: 1,
-    backgroundColor: 'black',
+    backgroundColor: '#1E1E1E',
   },
   header: {
     paddingTop: 40,
     paddingHorizontal: 10,
     paddingBottom: 15,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#2B2D31',
   },
   headerContent: {
     flexDirection: 'row',
@@ -572,7 +573,7 @@ const styles = StyleSheet.create({
     height: 12,
     borderRadius: 6,
     borderWidth: 2,
-    borderColor: '#1a1a1a',
+    borderColor: '#2B2D31',
   },
   headerText: {
     color: 'white',
@@ -588,7 +589,7 @@ const styles = StyleSheet.create({
   },
   chatArea: {
     flex: 1,
-    backgroundColor: 'black',
+    backgroundColor: '#1E1E1E',
   },
   messagesContainer: {
     padding: 15,
@@ -619,7 +620,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   inputWrapper: {
-    backgroundColor: 'black',
+    backgroundColor: '#1E1E1E',
     paddingHorizontal: 10,
     paddingBottom: 10,
     paddingTop: 5,

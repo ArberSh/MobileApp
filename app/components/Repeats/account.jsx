@@ -1,35 +1,37 @@
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React, { use, useEffect, useState } from 'react'
+import { Image, StyleSheet,  TouchableOpacity, View } from 'react-native'
+import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
+import Text from '../CustomText';
 
-const Account = ({ name, image, text , notification,status}) => {
+const Account = ({ name, image, text, notification, status }) => {
   const [imageError, setImageError] = useState(false)
   
   const randomColor = `hsl(${Math.random() * 360}, 50%, 50%)`
-  const [Notification,hasNotification] = useState(false)
-      const navigation = useNavigation();
+  const [Notification, hasNotification] = useState(false)
+  const navigation = useNavigation();
 
-  useEffect(()=>{
+  useEffect(() => {
     if(notification !== null){
         hasNotification(true)
-  }
+    }
   },[])
   //Change here up when you will import the database.
 
   return (
     <View>
       <TouchableOpacity
-  onPress={() => navigation.navigate("ChatRoom")}
-  style={{
-    backgroundColor: "#2B2D31",
-    borderRadius: 20,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#5E5E5E"
-  }}
->
+        onPress={() => navigation.navigate("ChatRoom")}
+        style={{
+          backgroundColor: "#2B2D31",
+          borderRadius: 20,
+          paddingVertical: 10,
+          borderBottomWidth: 1,
+          borderBottomColor: "#5E5E5E"
+        }}
+      >
         <View style={{ paddingVertical: 10, flexDirection: "row", alignItems: "center" }}>
-          <View>
+          {/* Profile Image Container - now with status indicator */}
+          <View style={{ position: 'relative' }}>
             {(!image || imageError) ? (
               <View style={{
                 width: 50,
@@ -39,7 +41,7 @@ const Account = ({ name, image, text , notification,status}) => {
                 justifyContent: 'center',
                 alignItems: 'center'
               }}>
-                <Text style={{ color: 'white', fontWeight: 'bold' , fontSize:24}}>
+                <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 24 }}>
                   {name?.charAt(0)}
                 </Text>
               </View>
@@ -54,7 +56,21 @@ const Account = ({ name, image, text , notification,status}) => {
                 onError={() => setImageError(true)}
               />
             )}
+            
+            {/* Status indicator dot */}
+            <View style={{
+              position: 'absolute',
+              bottom: 2,
+              right: 2,
+              width: 14,
+              height: 14,
+              borderRadius: 7,
+              backgroundColor: status === 'online' ? '#44b700' : '#9e9e9e',
+              borderWidth: 2,
+              borderColor: '#2B2D31'
+            }} />
           </View>
+
           <View style={{ marginHorizontal: 10 }}>
             <View>
               <Text style={{ color: "white", fontWeight: "800", fontSize: 20 }}>
@@ -62,46 +78,41 @@ const Account = ({ name, image, text , notification,status}) => {
               </Text>
             </View>
             <View>
-              <Text style={{ color: "#d3d3d3", fontSize: 16 }}>
+              <Text style={{ color: "#d3d3d3", fontSize: 16 , }}>
                 {text}
               </Text>
             </View>
           </View>
           <View style={{
-  paddingRight: 24,
-  flex: 1,
-  alignItems: 'flex-end',
-  justifyContent: 'flex-end'
-}}>
-  {notification > 0 && (
-    <View style={{
-      backgroundColor: '#00c9bd',
-      borderRadius: 100,
-      width: 22,
-      height: 22,
-      justifyContent: 'center',
-      alignItems: 'center'
-    }}>
-      <Text style={{
-        textAlign: 'center',
-        color: 'white',
-        fontSize: 12,
-        lineHeight: 22 // Ensures vertical centering
-      }}>
-        {notification > 9 ? '9+' : notification.toString()}
-      </Text>
-    </View>
-  )}
-
-            
+            paddingRight: 24,
+            flex: 1,
+            alignItems: 'flex-end',
+            justifyContent: 'flex-end'
+          }}>
+            {notification > 0 && (
+              <View style={{
+                backgroundColor: '#00c9bd',
+                borderRadius: 100,
+                width: 22,
+                height: 22,
+                justifyContent: 'center',
+                alignItems: 'center'
+              }}>
+                <Text style={{
+                  textAlign: 'center',
+                  color: 'white',
+                  fontSize: 12,
+                  lineHeight: 22 // Ensures vertical centering
+                }}>
+                  {notification > 9 ? '9+' : notification.toString()}
+                </Text>
+              </View>
+            )}
           </View>
         </View>
       </TouchableOpacity>
     </View>
   )
 }
-
-const styles = StyleSheet.create({})
-
 
 export default Account

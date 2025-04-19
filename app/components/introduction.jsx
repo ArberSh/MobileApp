@@ -1,25 +1,24 @@
 import React, { useCallback } from "react";
 import {
   StyleSheet,
-  Text,
   View,
   SafeAreaView,
   ImageBackground,
   Dimensions,
   TouchableOpacity,
 } from "react-native";
-import * as SplashScreen from "expo-splash-screen"; // Import properly
+import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
-import {useNavigation} from "@react-navigation/native"
+import { useNavigation } from "@react-navigation/native";
+import Text from './CustomText';
 
 
 const { height } = Dimensions.get("window");
 
-
-const Login = () => {
+const Introduction = () => {
   const [fontsLoaded] = useFonts({
-    "Poppins-Medium": require("../assets/fonts/Poppins/Poppins-Medium.ttf"),
-    "Poppins-Bold": require("../assets/fonts/Poppins/Poppins-Bold.ttf"),
+    "Lexend-Medium": require("../assets/fonts/Lexend/static/Lexend-Medium.ttf"),
+    "Lexend-Bold": require("../assets/fonts/Lexend/static/Lexend-Bold.ttf"),
   });
 
   const navigation = useNavigation();
@@ -39,7 +38,7 @@ const Login = () => {
   }
 
   return (
-     <SafeAreaView onLayout={onLayout} style={{ backgroundColor: "black", height: "100%" }}>
+    <SafeAreaView onLayout={onLayout} style={{ backgroundColor: "black", height: "100%" }}>
       <View>
         <ImageBackground
           style={{
@@ -59,7 +58,7 @@ const Login = () => {
             style={{
               fontSize: 36,
               color: "#00c9bd",
-              fontFamily: "Poppins-Bold",
+              fontFamily: "Lexend-Bold",
               textAlign: "center",
             }}
           >
@@ -69,7 +68,7 @@ const Login = () => {
             style={{
               fontSize: 16,
               color: "white",
-              fontFamily: "Poppins-Medium",
+              fontFamily: "Lexend-Medium",
               textAlign: "center",
             }}
           >
@@ -98,7 +97,7 @@ const Login = () => {
           >
             <Text
               style={{
-                fontFamily: "Poppins-Medium",
+                fontFamily: "Lexend-Medium",
                 color: "white",
                 fontSize: 20,
                 textAlign: "center",
@@ -108,7 +107,7 @@ const Login = () => {
             </Text>
           </TouchableOpacity>
           <TouchableOpacity 
-          onPress={() => navigation.navigate("register")}
+            onPress={() => navigation.navigate("register")}
             style={{
               backgroundColor: "black",
               paddingVertical: 6,
@@ -119,7 +118,7 @@ const Login = () => {
           >
             <Text
               style={{
-                fontFamily: "Poppins-Medium",
+                fontFamily: "Lexend-Medium",
                 color: "white",
                 fontSize: 20,
                 textAlign: "center",
@@ -134,8 +133,4 @@ const Login = () => {
   );
 };
 
-export default Login;
-
-const styles = StyleSheet.create({
-  Div: {},
-});
+export default Introduction;
