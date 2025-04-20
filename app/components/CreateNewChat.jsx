@@ -1,12 +1,14 @@
-import { StyleSheet,  TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import React, { useState, useContext } from 'react';
 import { TextInput } from 'react-native-gesture-handler';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import { FriendsContext } from './FriendsContext'; // Make sure this path is correct
 import Text from './CustomText';
+import { useTheme } from './ThemeContext';
 
 const CreateNewChat = () => {
+  const { colors } = useTheme();
   const [username, setUsername] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [requestSent, setRequestSent] = useState(false);
@@ -49,14 +51,85 @@ const CreateNewChat = () => {
     }, 2000);
   };
 
+  // Create styles with current theme colors
+  const themedStyles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+      paddingTop: 50,
+      paddingHorizontal: 20,
+    },
+    backButton: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    title: {
+      color: colors.text,
+      fontSize: 26,
+      fontFamily: "Lexend-Bold",
+      textAlign: 'center',
+      marginBottom: 8,
+    },
+    subtitle: {
+      color: colors.subText,
+      fontSize: 14,
+      fontFamily: "Lexend-Bold",
+      textAlign: 'center',
+      marginBottom: 30,
+    },
+    inputLabel: {
+      color: colors.text,
+      fontSize: 14,
+      fontFamily: "Lexend-Bold",
+      marginBottom: 8,
+    },
+    inputWrapper: {
+      flexDirection: 'row',
+      backgroundColor: colors.input,
+      borderRadius: 10,
+      alignItems: 'center',
+      paddingHorizontal: 12,
+    },
+    input: {
+      flex: 1,
+      padding: 12,
+      color: colors.text,
+      fontSize: 16,
+      fontFamily: "Lexend",
+    },
+    successTitle: {
+      color: colors.text,
+      fontSize: 24,
+      fontFamily: "Lexend-Bold",
+      marginBottom: 16,
+    },
+    successText: {
+      color: colors.text,
+      fontSize: 16,
+      textAlign: 'center',
+      fontFamily: "Lexend",
+      marginBottom: 8,
+    },
+    successSubtext: {
+      color: colors.subText,
+      fontSize: 14,
+      textAlign: 'center',
+      fontFamily: "Lexend",
+      marginTop: 20,
+    }
+  });
+
   return (
-    <View style={styles.container}>
+    <View style={themedStyles.container}>
       <View style={styles.header}>
         <TouchableOpacity 
           onPress={() => navigation.goBack()}
-          style={styles.backButton}
+          style={themedStyles.backButton}
         >
-          <Ionicons name="arrow-back" size={28} color="white" />
+          <Ionicons name="arrow-back" size={28} color={colors.text} />
         </TouchableOpacity>
       </View>
       
@@ -65,32 +138,32 @@ const CreateNewChat = () => {
           <View style={styles.successIcon}>
             <Ionicons name="checkmark-outline" size={40} color="white" />
           </View>
-          <Text style={styles.successTitle}>Friend Request Sent!</Text>
-          <Text style={styles.successText}>
+          <Text style={themedStyles.successTitle}>Friend Request Sent!</Text>
+          <Text style={themedStyles.successText}>
             Your friend request to @{username} has been sent successfully.
           </Text>
-          <Text style={styles.successSubtext}>
+          <Text style={themedStyles.successSubtext}>
             Redirecting back to friends list...
           </Text>
         </View>
       ) : (
         <View style={styles.content}>
-          <Text style={styles.title}>
+          <Text style={themedStyles.title}>
             Add Friend
           </Text>
-          <Text style={styles.subtitle}>
+          <Text style={themedStyles.subtitle}>
             Enter a username to send them a request.
           </Text>
           <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>
+            <Text style={themedStyles.inputLabel}>
               Username
             </Text>
-            <View style={styles.inputWrapper}>
-              <Ionicons name="at-outline" size={24} color="#5E5E5E" style={styles.inputIcon}/>
+            <View style={themedStyles.inputWrapper}>
+              <Ionicons name="at-outline" size={24} color={colors.subText} style={styles.inputIcon}/>
               <TextInput 
-                style={styles.input}
+                style={themedStyles.input}
                 placeholder="Enter username"
-                placeholderTextColor="#9E9E9E"
+                placeholderTextColor={colors.subText}
                 value={username}
                 onChangeText={handleUsernameChange}
                 autoCapitalize="none"
@@ -105,13 +178,13 @@ const CreateNewChat = () => {
           
           <View style={styles.buttonContainer}>
             <TouchableOpacity 
-              style={styles.cancelButton}
+              style={[styles.cancelButton,,{backgroundColor:colors.input}]}
               onPress={() => navigation.goBack()}
             >
-              <Text style={styles.buttonText}>Cancel</Text>
+              <Text style={[styles.buttonText,{backgroundColor:colors.text}]}>Cancel</Text>
             </TouchableOpacity>
             <TouchableOpacity 
-              style={styles.sendButton}
+              style={[styles.sendButton ]}
               onPress={handleSendRequest}
             >
               <Text style={styles.buttonText}>Send Request</Text>
@@ -124,66 +197,19 @@ const CreateNewChat = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#1E1E1E',
-    paddingTop: 50,
-    paddingHorizontal: 20,
-  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 20,
   },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   content: {
     flex: 1,
-  },
-  title: {
-    color: "white",
-    fontSize: 26,
-    fontFamily: "Lexend-Bold",
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  subtitle: {
-    color: "#6E6E6E",
-    fontSize: 14,
-    fontFamily: "Lexend-Bold",
-    textAlign: 'center',
-    marginBottom: 30,
   },
   inputContainer: {
     marginTop: 16,
   },
-  inputLabel: {
-    color: 'white',
-    fontSize: 14,
-    fontFamily: "Lexend-Bold",
-    marginBottom: 8,
-  },
-  inputWrapper: {
-    flexDirection: 'row',
-    backgroundColor: '#2A2C32',
-    borderRadius: 10,
-    alignItems: 'center',
-    paddingHorizontal: 12,
-  },
   inputIcon: {
     marginRight: 8,
-  },
-  input: {
-    flex: 1,
-    padding: 12,
-    color: 'white',
-    fontSize: 16,
-    fontFamily: "Lexend",
   },
   errorText: {
     color: '#ff6b6b',
@@ -233,26 +259,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 24,
   },
-  successTitle: {
-    color: 'white',
-    fontSize: 24,
-    fontFamily: "Lexend-Bold",
-    marginBottom: 16,
-  },
-  successText: {
-    color: 'white',
-    fontSize: 16,
-    textAlign: 'center',
-    fontFamily: "Lexend",
-    marginBottom: 8,
-  },
-  successSubtext: {
-    color: '#6E6E6E',
-    fontSize: 14,
-    textAlign: 'center',
-    fontFamily: "Lexend",
-    marginTop: 20,
-  }
 });
 
 export default CreateNewChat;

@@ -1,10 +1,10 @@
-import { StyleSheet, TouchableOpacity, View,Image} from 'react-native'
+import { StyleSheet, TouchableOpacity, View, Image } from 'react-native'
 import React from 'react'
 import Text from '../CustomText';
+import { useTheme } from '../ThemeContext';
 
-
-const GroupCard = ({name,photo,description,color}) => {
-
+const GroupCard = ({name, photo, description, color}) => {
+  const { colors } = useTheme();
   const firstLetter = name ? name.charAt(0).toUpperCase() : '?';
 
   const darkenColor = (color) => {
@@ -36,47 +36,47 @@ const GroupCard = ({name,photo,description,color}) => {
 
   return (
     <TouchableOpacity style={{
-      height:120,
-      borderRadius:16,
-      marginTop:10,
-         }}>
+      height: 120,
+      borderRadius: 16,
+      marginTop: 10,
+    }}>
       <View style={{
-        backgroundColor:color,
-        height:'59%',
+        backgroundColor: color,
+        height: '59%',
         borderTopLeftRadius: 16,
         borderTopRightRadius: 16,
-        padding:10
+        padding: 10
       }}>
         <View style={{
-          flexDirection:'row',
-          alignItems:'center'
-          
+          flexDirection: 'row',
+          alignItems: 'center'
         }}>
           <View style={[styles.letterAvatar, { backgroundColor: darkColor || '#4ea4a6' }]}>
             <Text style={styles.letterText}>{firstLetter}</Text>
           </View>
           <Text style={{
-            fontSize:20,
-            marginLeft:10
+            fontSize: 20,
+            marginLeft: 10,
+            color: colors.text
           }}>
             {name}
           </Text>
         </View>
       </View>
       <View style={{
-        backgroundColor:'#D9D9D9',
-        height:'41%',
-        borderBottomLeftRadius:16,
-        borderBottomRightRadius:16
+        backgroundColor: colors.cardBackground,
+        height: '41%',
+        borderBottomLeftRadius: 16,
+        borderBottomRightRadius: 16
       }}>
         <View style={{
-          padding:10
+          padding: 10
         }}>
-        <Text style={{
-          
-        }}>
-          {description}
-        </Text>
+          <Text style={{
+            color: colors.subText
+          }}>
+            {description}
+          </Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -86,15 +86,14 @@ const GroupCard = ({name,photo,description,color}) => {
 export default GroupCard
 
 const styles = StyleSheet.create({
-
   letterAvatar: {
     width: 48,
     height: 48,
     borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
-    borderColor:'black',
-    borderWidth:1
+    borderColor: 'black',
+    borderWidth: 1
   },
   letterText: {
     color: 'white',

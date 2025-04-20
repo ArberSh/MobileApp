@@ -4,12 +4,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import GroupCard from './Repeats/GroupCard';
 import { GroupsContext } from './GroupsContext'; // Import the context
+import { useTheme } from './ThemeContext'; // Import theme hook
 import Text from './CustomText';
 
 const Groups = ({ drawerNavigation }) => {
   const navigation = useNavigation();
   const { height } = Dimensions.get('window');
   const [searchQuery, setSearchQuery] = useState('');
+  const { colors } = useTheme(); // Get theme colors
   
   const [dimensions, setDimensions] = useState({
     heightWindow: height,
@@ -83,28 +85,28 @@ const Groups = ({ drawerNavigation }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.headerBackground }]}>
       <View style={styles.searchContainer}>
-        <View style={styles.searchInputContainer}>
-          <Ionicons name="search-outline" size={20} color="#9e9e9e" style={styles.searchIcon} />
+        <View style={[styles.searchInputContainer, { backgroundColor: colors.input }]}>
+          <Ionicons name="search-outline" size={20} color={colors.subText} style={styles.searchIcon} />
           <TextInput
-            style={styles.searchInput}
+            style={[styles.searchInput, { color: colors.text }]}
             maxLength={30}
             placeholder="Search Groups..."
-            placeholderTextColor='#9e9e9e'
+            placeholderTextColor={colors.subText}
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
           {searchQuery.length > 0 && (
             <TouchableOpacity onPress={clearSearch} style={styles.clearButton}>
-              <Ionicons name="close-circle" size={20} color="#9e9e9e" />
+              <Ionicons name="close-circle" size={20} color={colors.subText} />
             </TouchableOpacity>
           )}
         </View>
       </View>
 
-      <View style={styles.contentWrapper}>
-        <ScrollView contentContainerStyle={styles.content}>
+      <View style={[styles.contentWrapper, { backgroundColor: colors.background2 }]}>
+        <ScrollView contentContainerStyle={[styles.content, { backgroundColor: colors.background2 }]}>
           {filteredGroups.length > 0 ? (
             filteredGroups.map((group, index) => (
               <TouchableOpacity 
@@ -116,18 +118,21 @@ const Groups = ({ drawerNavigation }) => {
                   description={group.description || 'No description'} 
                   photo={group.photo} 
                   color={group.color || '#4ea4a6'} 
+                  themeColors={colors} // Pass theme colors to GroupCard component
                 />
               </TouchableOpacity>
             ))
           ) : (
             <View style={styles.noGroupsContainer}>
-              <Ionicons name="people-outline" size={64} color="#5E5E5E" />
+              <Ionicons name="people-outline" size={64} color={colors.subText} />
               <Text style={styles.noGroupsText}>{getNoGroupsMessage()}</Text>
-              <Text style={styles.noGroupsSubtext}>{getNoGroupsSubtext()}</Text>
+              <Text style={[styles.noGroupsSubtext, { color: colors.subText }]}>
+                {getNoGroupsSubtext()}
+              </Text>
               
               {searchQuery && (
                 <TouchableOpacity 
-                  style={styles.clearSearchButton}
+                  style={[styles.clearSearchButton, { backgroundColor: colors.cardBackground }]}
                   onPress={clearSearch}
                 >
                   <Text style={styles.clearSearchText}>Clear Search</Text>
@@ -139,11 +144,11 @@ const Groups = ({ drawerNavigation }) => {
       </View>
 
       <TouchableOpacity
-        style={styles.fab}
+        style={[styles.fab, { backgroundColor: colors.cardBackground }]}
         onPress={() => navigation.navigate('CreateNewGroup')}
       >
         <View style={styles.fabContent}>
-          <Ionicons name="add-outline" size={28} color="white" />
+          <Ionicons name="add-outline" size={28} color={colors.text} />
         </View>
       </TouchableOpacity>
     </View>
@@ -153,7 +158,6 @@ const Groups = ({ drawerNavigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1C1D20',
   },
   searchContainer: {
     marginHorizontal: '5%',
@@ -161,7 +165,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   searchInputContainer: {
-    backgroundColor: '#5E5E5E',
     borderRadius: 15,
     flexDirection: 'row',
     alignItems: 'center',
@@ -173,7 +176,6 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    color: 'white',
     fontSize: 16,
     paddingVertical: 10,
   },
@@ -181,7 +183,6 @@ const styles = StyleSheet.create({
     padding: 6,
   },
   content: {
-    backgroundColor: '#2B2D31',
     paddingHorizontal: 10,
     paddingBottom: 20,
     minHeight: 300, // Ensure there's enough space for the no groups message
@@ -189,7 +190,6 @@ const styles = StyleSheet.create({
   contentWrapper: {
     flex: 1,
     marginHorizontal: 10,
-    backgroundColor: '#2B2D31',
     padding: 4,
     borderRadius: 16
   },
@@ -197,7 +197,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 20,
     right: 20,
-    backgroundColor: '#1E1E1E',
     width: 56,
     height: 56,
     borderRadius: 28,
@@ -221,13 +220,11 @@ const styles = StyleSheet.create({
     paddingVertical: 60,
   },
   noGroupsText: {
-    color: 'white',
     fontSize: 22,
     fontWeight: 'bold',
     marginTop: 16,
   },
   noGroupsSubtext: {
-    color: '#9e9e9e',
     fontSize: 16,
     marginTop: 8,
     textAlign: 'center',
@@ -235,13 +232,11 @@ const styles = StyleSheet.create({
   },
   clearSearchButton: {
     marginTop: 20,
-    backgroundColor: '#3f4147',
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 8,
   },
   clearSearchText: {
-    color: 'white',
     fontSize: 14,
     fontWeight: 'bold',
   }

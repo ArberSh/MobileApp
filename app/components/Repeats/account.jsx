@@ -1,10 +1,12 @@
-import { Image, StyleSheet,  TouchableOpacity, View } from 'react-native'
+import { Image, StyleSheet, TouchableOpacity, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import Text from '../CustomText';
+import { useTheme } from '../ThemeContext';
 
 const Account = ({ name, image, text, notification, status }) => {
   const [imageError, setImageError] = useState(false)
+  const { colors } = useTheme();
   
   const randomColor = `hsl(${Math.random() * 360}, 50%, 50%)`
   const [Notification, hasNotification] = useState(false)
@@ -22,11 +24,11 @@ const Account = ({ name, image, text, notification, status }) => {
       <TouchableOpacity
         onPress={() => navigation.navigate("ChatRoom")}
         style={{
-          backgroundColor: "#2B2D31",
+          backgroundColor: colors.background2,
           borderRadius: 20,
           paddingVertical: 10,
           borderBottomWidth: 1,
-          borderBottomColor: "#5E5E5E"
+          borderBottomColor: colors.isDark ? "#5E5E5E" : "#E0E0E0"
         }}
       >
         <View style={{ paddingVertical: 10, flexDirection: "row", alignItems: "center" }}>
@@ -67,18 +69,18 @@ const Account = ({ name, image, text, notification, status }) => {
               borderRadius: 7,
               backgroundColor: status === 'online' ? '#44b700' : '#9e9e9e',
               borderWidth: 2,
-              borderColor: '#2B2D31'
+              borderColor: colors.background2
             }} />
           </View>
 
           <View style={{ marginHorizontal: 10 }}>
             <View>
-              <Text style={{ color: "white", fontWeight: "800", fontSize: 20 }}>
+              <Text style={{ color: colors.text, fontWeight: "800", fontSize: 20 }}>
                 {name}
               </Text>
             </View>
             <View>
-              <Text style={{ color: "#d3d3d3", fontSize: 16 , }}>
+              <Text style={{ color: colors.subText, fontSize: 16 }}>
                 {text}
               </Text>
             </View>

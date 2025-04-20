@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { TextInput } from 'react-native-gesture-handler';
 import { FriendsContext } from '../components/FriendsContext'; // Import the context
+import { useTheme } from './ThemeContext'; // Import theme hook
 import Text from './CustomText';
 
 // Color generation utility - creates a deterministic color from a string
@@ -23,6 +24,7 @@ const Friends = ({ drawerNavigation, onSelectChat }) => {
   const [selectedFilter, setSelectedFilter] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const screenHeight = Dimensions.get('window').height;
+  const { colors } = useTheme(); // Get theme colors
   
   // Use the friends data from context instead of local state
   const { friends } = useContext(FriendsContext);
@@ -69,7 +71,7 @@ const Friends = ({ drawerNavigation, onSelectChat }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.headerBackground }]}>
       <View style={{
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -79,32 +81,33 @@ const Friends = ({ drawerNavigation, onSelectChat }) => {
         marginBottom: 10
       }}>
         <View style={{
-          backgroundColor: '#5E5E5E',
+          backgroundColor: colors.input,
           width: '84%',
           borderRadius: 15,
         }}>
           <TextInput
             style={{
-              backgroundColor: '#5E5E5E',
+              backgroundColor: colors.input,
               borderRadius: 15,
               flex: 1,
-              color: 'white',
+              color: colors.text,
               paddingVertical: 10,
               fontSize: 16,
               paddingHorizontal: 8,
             }}
             maxLength={30}
             placeholder="Search Friends..."
-            placeholderTextColor='white'
+            placeholderTextColor={colors.subText}
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
         </View>
         <TouchableOpacity 
-          style={[styles.filterButton, showFilters && styles.activeFilterButton]}
+          style={[styles.filterButton, showFilters && styles.activeFilterButton, 
+            { backgroundColor: showFilters ? colors.input : 'transparent' }]}
           onPress={() => setShowFilters(!showFilters)}
         >
-          <Ionicons name="filter-outline" color='white' size={24} />
+          <Ionicons name="filter-outline" color={colors.text} size={24} />
         </TouchableOpacity>
       </View>
       
@@ -118,37 +121,49 @@ const Friends = ({ drawerNavigation, onSelectChat }) => {
           marginBottom: '4%'
         }}>
           <TouchableOpacity
-            style={[styles.filterBtn, selectedFilter === 'All' && styles.selectedFilter]}
+            style={[
+              styles.filterBtn, 
+              selectedFilter === 'All' && styles.selectedFilter,
+              { backgroundColor: selectedFilter === 'All' ? colors.input : 'transparent' }
+            ]}
             onPress={() => {
               setSelectedFilter('All');
             }}
           >
-            <Text style={styles.filterText}>All</Text>
+            <Text style={[styles.filterText ,{color:colors.text}]}>All</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.filterBtn, selectedFilter === 'Online' && styles.selectedFilter]}
+            style={[
+              styles.filterBtn, 
+              selectedFilter === 'Online' && styles.selectedFilter,
+              { backgroundColor: selectedFilter === 'Online' ? colors.input : 'transparent' }
+            ]}
             onPress={() => {
               setSelectedFilter('Online');
             }}
           >
-            <Text style={styles.filterText}>Online</Text>
+            <Text style={[styles.filterText ,{color:colors.text}] }>Online</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.filterBtn, selectedFilter === 'Offline' && styles.selectedFilter]}
+            style={[
+              styles.filterBtn, 
+              selectedFilter === 'Offline' && styles.selectedFilter,
+              { backgroundColor: selectedFilter === 'Offline' ? colors.input : 'transparent' }
+            ]}
             onPress={() => {
               setSelectedFilter('Offline');
             }}
           >
-            <Text style={styles.filterText}>Offline</Text>
+            <Text style={[styles.filterText ,{color:colors.text}]}>Offline</Text>
           </TouchableOpacity>
         </View>
       )}
       
-      <View style={[styles.contentWrapper]}>
+      <View style={[styles.contentWrapper, { backgroundColor: colors.background2 }]}>
         <ScrollView 
-          contentContainerStyle={styles.content}
+          contentContainerStyle={[styles.content, { backgroundColor: colors.background2 }]}
         >
           {filteredFriends.length > 0 ? (
             filteredFriends.map((friend, index) => (
@@ -162,15 +177,16 @@ const Friends = ({ drawerNavigation, onSelectChat }) => {
                   notification={friend.notification || 0}
                   image={friend.profilePicture}
                   status={friend.isOnline ? 'online' : 'offline'}
-                  avatarColor={getFriendAvatarColor(friend)} // Pass consistent color to Account component
+                  avatarColor={getFriendAvatarColor(friend)}
+                  themeColors={colors} // Pass theme colors to Account component
                 />
               </TouchableOpacity>
             ))
           ) : (
             <View style={styles.noFriendsContainer}>
-              <Ionicons name="people-outline" size={64} color="#5E5E5E" />
+              <Ionicons name="people-outline" size={64} color={colors.subText} />
               <Text style={styles.noFriendsText}>No friends found</Text>
-              <Text style={styles.noFriendsSubtext}>
+              <Text style={[styles.noFriendsSubtext, { color: colors.subText }]}>
                 {searchQuery ? 
                   "Try a different search term or filter" : 
                   "Add friends to start chatting"}
@@ -181,11 +197,11 @@ const Friends = ({ drawerNavigation, onSelectChat }) => {
       </View>
 
       <TouchableOpacity
-        style={styles.fab}
+        style={[styles.fab, { backgroundColor: colors.cardBackground }]}
         onPress={() => navigation.navigate('CreateNewChat')}
       >
         <View style={styles.fabContent}>
-          <Ionicons name="add-outline" size={28} color="white" />
+          <Ionicons name="add-outline" size={28} color={colors.text} />
         </View>
       </TouchableOpacity>
     </View>
@@ -195,10 +211,8 @@ const Friends = ({ drawerNavigation, onSelectChat }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1C1D20',
   },
   content: {
-    backgroundColor: '#2B2D31',
     paddingHorizontal: 10,
     paddingBottom: 20,
     minHeight: 300, // Ensure there's enough space for the no friends message
@@ -206,7 +220,6 @@ const styles = StyleSheet.create({
   contentWrapper: {
     flex: 1,
     marginHorizontal: 10,
-    backgroundColor: '#2B2D31',
     padding: 4,
     borderRadius: 16
   },
@@ -214,7 +227,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 20,
     right: 20,
-    backgroundColor: '#1E1E1E',
     width: 56,
     height: 56,
     borderRadius: 28,
@@ -239,23 +251,20 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   activeFilterButton: {
-    backgroundColor: '#5E5E5E'
+    // The background color is now applied conditionally based on theme
   },
   filterBtn: {
     alignItems: 'center',
-    color: 'white',
     width: 80,
     marginHorizontal: 10,
     paddingVertical: 10,
     borderRadius: 12
   },
   filterText: {
-    color: 'white',
     fontSize: 20
   },
   selectedFilter: {
-    backgroundColor: '#5E5E5E',
-    color: 'black'
+    // Background color is now applied conditionally based on theme
   },
   noFriendsContainer: {
     alignItems: 'center',
@@ -263,13 +272,11 @@ const styles = StyleSheet.create({
     paddingVertical: 60,
   },
   noFriendsText: {
-    color: 'white',
     fontSize: 22,
     fontWeight: 'bold',
     marginTop: 16,
   },
   noFriendsSubtext: {
-    color: '#9e9e9e',
     fontSize: 16,
     marginTop: 8,
     textAlign: 'center',

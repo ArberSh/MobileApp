@@ -7,34 +7,34 @@ import Account from "./Repeats/account";
 import Groups from './Groups';
 import Friends from "./Friends";
 import { TextInput } from "react-native-gesture-handler";
+import { useTheme } from './ThemeContext'; // Import theme hook
 import Text from './CustomText';
-
 
 const Chats = () => {
   const Tab = createMaterialTopTabNavigator();
-
+  const { colors } = useTheme(); // Get theme colors
   
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.headerBackground }]}>
       <View style={{paddingHorizontal:20}}>
-        <Text style={{color: "white",
-    fontSize: 32,
-    fontFamily:'Lexend-Bold',}}>
+        <Text style={{
+          fontSize: 32,
+          fontFamily:'Lexend-Bold',
+          color:colors.text
+        }}>
           Messages
         </Text>
-        
       </View>
       
       <Tab.Navigator
         screenOptions={{
-          tabBarStyle: styles.tabBar,
+          tabBarStyle: [styles.tabBar, { backgroundColor: colors.headerBackground }],
           tabBarLabelStyle: styles.tabLabel,
-          tabBarIndicatorStyle: styles.indicator,
-          tabBarActiveTintColor: 'white',
-          tabBarInactiveTintColor: 'gray',
+          tabBarIndicatorStyle: [styles.indicator, { backgroundColor: colors.text }],
+          tabBarActiveTintColor: colors.text,
+          tabBarInactiveTintColor: colors.subText,
         }}
       >
-        
         <Tab.Screen 
           name="Friends" 
           component={Friends}
@@ -53,10 +53,8 @@ const Chats = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#1C1D20",
   },
   tabBar: {
-    backgroundColor: '#1C1D20',
     elevation: 0,
     shadowOpacity: 0,
     borderBottomWidth: 0,
@@ -67,7 +65,6 @@ const styles = StyleSheet.create({
     textTransform: 'capitalize',
   },
   indicator: {
-    backgroundColor: 'white',
     height: 2,
   },
 });

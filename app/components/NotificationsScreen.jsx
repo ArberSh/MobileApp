@@ -8,7 +8,7 @@ import UnreadNotifications from './Unread';
 import Mentions from './Mentions';
 import FriendsNotificiation from './FriendsNotificiation';
 import Text from './CustomText';
-
+import { useTheme } from './ThemeContext';
 
 // Import notifications data
 import notificationsData from '../notification.json';
@@ -17,6 +17,7 @@ import { formatRelativeTime } from './notificationUtils';
 const NotificationsScreen = () => {
   const navigation = useNavigation();
   const Tab = createMaterialTopTabNavigator();
+  const { colors } = useTheme();
   
   // State to store notifications
   const [notifications, setNotifications] = useState([]);
@@ -49,26 +50,68 @@ const NotificationsScreen = () => {
     );
   };
   
+  // Create styles with theme colors
+  const themedStyles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 20,
+      paddingTop: 50,
+      paddingBottom: 15,
+      backgroundColor: colors.background,
+    },
+    backButton: {
+      padding: 5,
+    },
+    placeholder: {
+      width: 28,
+    },
+    title: {
+      color: colors.text,
+      fontSize: 28,
+      fontFamily: 'Lexend-Bold',
+    },
+    tabBar: {
+      backgroundColor: colors.background,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.cardBackground,
+    },
+    tabLabel: {
+      fontFamily: 'Lexend-Medium',
+      fontSize: 18,
+      textTransform: 'none',
+    },
+    indicator: {
+      backgroundColor: colors.tabBarIndicator,
+      height: 3,
+    },
+  });
+  
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
+    <View style={themedStyles.container}>
+      <View style={themedStyles.header}>
         <TouchableOpacity 
-          style={styles.backButton}
+          style={themedStyles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Ionicons name="arrow-back" size={28} color="white" />
+          <Ionicons name="arrow-back" size={28} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.title}>Notifications</Text>
-        <View style={styles.placeholder} />
+        <Text style={themedStyles.title}>Notifications</Text>
+        <View style={themedStyles.placeholder} />
       </View>
       
       <Tab.Navigator
         screenOptions={{
-          tabBarStyle: styles.tabBar,
-          tabBarLabelStyle: styles.tabLabel,
-          tabBarIndicatorStyle: styles.indicator,
-          tabBarActiveTintColor: 'white',
-          tabBarInactiveTintColor: 'gray',
+          tabBarStyle: themedStyles.tabBar,
+          tabBarLabelStyle: themedStyles.tabLabel,
+          tabBarIndicatorStyle: themedStyles.indicator,
+          tabBarActiveTintColor: colors.text,
+          tabBarInactiveTintColor: colors.tabBarInactive,
         }}
       >
         <Tab.Screen 
@@ -108,46 +151,5 @@ const NotificationsScreen = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#1E1E1E',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 50,
-    paddingBottom: 15,
-    backgroundColor: '#1E1E1E',
-  },
-  backButton: {
-    padding: 5,
-  },
-  placeholder: {
-    width: 28,
-  },
-  title: {
-    color: 'white',
-    fontSize: 28,
-    fontFamily: 'Lexend-Bold',
-  },
-  tabBar: {
-    backgroundColor: '#1E1E1E',
-    borderBottomWidth: 1,
-    borderBottomColor: '#3F414A',
-  },
-  tabLabel: {
-    fontFamily: 'Lexend-Medium',
-    fontSize: 18,
-    textTransform: 'none',
-  },
-  indicator: {
-    backgroundColor: 'white',
-    height: 3,
-  },
-});
 
 export default NotificationsScreen;

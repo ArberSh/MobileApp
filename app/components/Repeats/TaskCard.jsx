@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons'
 import Text from '../CustomText';
 import { useTheme } from '../ThemeContext';
 
-const TaskCard = ({ title, date, clock, status, onPress }) => {
+const TaskCard = ({ title, date, clock, status, description, assignedBy, onPress }) => {
   // Get theme colors
   const { colors } = useTheme();
   
@@ -33,9 +33,13 @@ const TaskCard = ({ title, date, clock, status, onPress }) => {
       statusColor = '#2196F3';
       statusText = 'Upcoming';
       break;
+    case 'completed':
+      statusColor = '#4CAF50';
+      statusText = 'Completed';
+      break;
     default:
-      statusColor = '#666';
-      statusText = 'Unknown';
+      statusColor = '#2196F3';
+      statusText = 'Upcoming';
   }
 
   return (

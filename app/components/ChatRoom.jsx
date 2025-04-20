@@ -21,13 +21,14 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import Text from './CustomText';
-
+import { useTheme } from './ThemeContext'; // Import useTheme hook
 
 const { width, height } = Dimensions.get('window');
 
 const ChatRoom = () => {
   const navigation = useNavigation();
   const route = useRoute();
+  const { colors, isDark } = useTheme(); // Get current theme colors
   
   // Get chat info from route params or use defaults
   const chatInfo = route.params || {};
@@ -49,41 +50,59 @@ const ChatRoom = () => {
   // Add state for profile menu dropdown
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   
-  // Pan responder for swipe gestures
-  const panResponder = useRef(
-    PanResponder.create({
-      onMoveShouldSetPanResponder: (evt, gestureState) => {
-        // Only respond to horizontal gestures that start from the left edge
-        return gestureState.dx > 20 && 
-               Math.abs(gestureState.dx) > Math.abs(gestureState.dy) &&
-               evt.nativeEvent.pageX < 50;
-      },
-      onPanResponderMove: (evt, gestureState) => {
-        // Move the screen with the gesture
-        screenPosition.setValue(Math.max(0, gestureState.dx));
-      },
-      onPanResponderRelease: (evt, gestureState) => {
-        // If swipe is more than 1/3 of the screen width, go back
-        if (gestureState.dx > width / 3) {
-          // Animate the rest of the way
-          Animated.timing(screenPosition, {
-            toValue: width,
-            duration: 250,
-            useNativeDriver: true,
-          }).start(() => {
-            // Go back after animation completes
-            navigation.goBack();
-          });
-        } else {
-          // Otherwise, reset the position
-          Animated.spring(screenPosition, {
-            toValue: 0,
-            useNativeDriver: true,
-          }).start();
-        }
-      },
-    })
-  ).current;
+  // Reference for ScrollView to auto-scroll to bottom
+  const scrollViewRef = useRef();
+  
+  // Current user ID - this will determine which messages appear on the right
+  const currentUserID = "1";
+
+  // Load messages from your external JSON file
+  useEffect(() => {
+    // In a real app, you would import and process your messages.json file
+    // For this example, we'll assume we're using the second document from your paste
+    fetchMessages();
+  }, []);
+  
+  const fetchMessages = async () => {
+    try {
+      // In a real app, this would be a fetch or import of your JSON file
+      // For now, we'll simulate loading messages
+      
+      // You could use require if the file is local:
+      // const messageData = require('./messages.json');
+      
+      // Or fetch it from an API:
+      // const response = await fetch('your-api-url/messages.json');
+      // const messageData = await response.json();
+      
+      // For this example, we'll simulate processing the data
+      // by transforming it to match our UI needs
+      
+      // This assumes we're working with direct messages only for simplicity
+      const processedMessages = messageData
+        .filter(msg => msg.type === 'direct') // Filter to direct messages only
+        .map(msg => ({
+          id: msg.time, // Using timestamp as ID
+          senderID: msg.senderID,
+          text: msg.message,
+          timestamp: msg.time,
+          isCurrentUser: msg.senderID === currentUserID
+        }));
+      
+      setMessages(processedMessages);
+      
+      // Scroll to bottom when messages are loaded
+      setTimeout(scrollToBottom, 100);
+    } catch (error) {
+      console.error("Error loading messages:", error);
+    }
+  };
+  
+  const scrollToBottom = () => {
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollToEnd({ animated: true });
+    }
+  };
 
   // Request permissions and set up keyboard listeners
   useEffect(() => {
@@ -99,6 +118,7 @@ const ChatRoom = () => {
       'keyboardDidShow',
       () => {
         setKeyboardVisible(true);
+        scrollToBottom();
       }
     );
     const keyboardDidHideListener = Keyboard.addListener(
@@ -138,6 +158,42 @@ const ChatRoom = () => {
       }
     }
   });
+
+  // Pan responder for swipe gestures
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (evt, gestureState) => {
+        // Only respond to horizontal gestures that start from the left edge
+        return gestureState.dx > 20 && 
+               Math.abs(gestureState.dx) > Math.abs(gestureState.dy) &&
+               evt.nativeEvent.pageX < 50;
+      },
+      onPanResponderMove: (evt, gestureState) => {
+        // Move the screen with the gesture
+        screenPosition.setValue(Math.max(0, gestureState.dx));
+      },
+      onPanResponderRelease: (evt, gestureState) => {
+        // If swipe is more than 1/3 of the screen width, go back
+        if (gestureState.dx > width / 3) {
+          // Animate the rest of the way
+          Animated.timing(screenPosition, {
+            toValue: width,
+            duration: 250,
+            useNativeDriver: true,
+          }).start(() => {
+            // Go back after animation completes
+            navigation.goBack();
+          });
+        } else {
+          // Otherwise, reset the position
+          Animated.spring(screenPosition, {
+            toValue: 0,
+            useNativeDriver: true,
+          }).start();
+        }
+      },
+    })
+  ).current;
 
   const showProfile = () => {
     setProfileVisible(true);
@@ -232,15 +288,20 @@ const ChatRoom = () => {
   const handleSend = () => {
     if (message.trim() || selectedFile) {
       const newMessage = {
-        id: Date.now(),
+        id: Date.now().toString(),
+        senderID: currentUserID,
         text: message,
         file: selectedFile,
         timestamp: new Date().toISOString(),
+        isCurrentUser: true
       };
       
       setMessages([...messages, newMessage]);
       setMessage('');
       setSelectedFile(null);
+      
+      // Scroll to bottom after sending a message
+      setTimeout(scrollToBottom, 100);
     }
   };
 
@@ -254,27 +315,96 @@ const ChatRoom = () => {
     }
   };
 
+  // For demo purposes, we'll create some mock message data
+  // This would normally come from your JSON file
+  const messageData = [
+    {
+      "senderID": "1",
+      "receiverID": "2",
+      "type": "direct",
+      "time": "2024-02-04T12:30:00Z",
+      "message": "Hey, how are you?"
+    },
+    {
+      "senderID": "2",
+      "receiverID": "1",
+      "type": "direct",
+      "time": "2024-02-04T12:31:00Z",
+      "message": "I'm good! What about you?"
+    },
+    {
+      "senderID": "1",
+      "receiverID": "2",
+      "type": "direct",
+      "time": "2024-02-04T12:32:30Z",
+      "message": "Doing great, just working on a project."
+    },
+    {
+      "senderID": "3",
+      "receiverID": "1",
+      "type": "direct",
+      "time": "2024-02-04T13:00:00Z",
+      "message": "Hey! Are you free to hop on a call?"
+    },
+    {
+      "senderID": "1",
+      "receiverID": "3",
+      "type": "direct",
+      "time": "2024-02-04T13:01:00Z",
+      "message": "Sure, give me 5 minutes to finish something up"
+    },
+    {
+      "senderID": "3",
+      "receiverID": "1",
+      "type": "direct",
+      "time": "2024-02-04T13:01:30Z",
+      "message": "Perfect, I'll set up the meeting"
+    }
+  ];
+
+  // Process messages for display right at render time
+  useEffect(() => {
+    const processedMessages = messageData.map(msg => ({
+      id: msg.time,
+      senderID: msg.senderID,
+      text: msg.message,
+      timestamp: msg.time,
+      isCurrentUser: msg.senderID === currentUserID
+    }));
+    
+    setMessages(processedMessages);
+    
+    // Scroll to bottom when messages are loaded
+    setTimeout(scrollToBottom, 100);
+  }, []);
+
   return (
     <Animated.View 
       style={[
         styles.safeArea, 
         keyboardVisible && styles.keyboardVisible,
-        { transform: [{ translateX: screenPosition }] }
+        { 
+          backgroundColor: colors.background, 
+          transform: [{ translateX: screenPosition }] 
+        }
       ]} 
       {...panResponder.panHandlers}
     >
-      <StatusBar backgroundColor="#2B2D31" barStyle="light-content" />
+      <StatusBar 
+        backgroundColor={colors.input} 
+        barStyle={isDark ? "light-content" : "dark-content"} 
+      />
       
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : null}
-        style={styles.container}
+        style={[styles.container, { backgroundColor: colors.background }]}
         keyboardVerticalOffset={0}
       >
         {/* Header */}
-        <View style={styles.header}>
+        <View style={[styles.header, { backgroundColor: colors.input }]}>
           <View style={styles.headerContent}>
             <TouchableOpacity onPress={goBack}>
-              <Ionicons name="arrow-back" size={28} color="white" />
+              <Ionicons name="arrow-back" size={28} color={colors.text} />
             </TouchableOpacity>
             
             <TouchableOpacity 
@@ -296,37 +426,50 @@ const ChatRoom = () => {
                   <View 
                     style={[
                       styles.statusIndicator, 
-                      { backgroundColor: status === 'Online' ? '#44b700' : '#ccc' }
+                      { 
+                        backgroundColor: status === 'Online' ? '#44b700' : '#ccc',
+                        borderColor: colors.headerBackground 
+                      }
                     ]} 
                   />
                 )}
               </View>
               
-              <Text style={styles.headerText}>{name}</Text>
+              <Text style={[styles.headerText, { color: colors.text }]}>{name}</Text>
             </TouchableOpacity>
             
             <View style={styles.headerIcons}>
               <TouchableOpacity style={styles.iconButton}>
-                <Ionicons name="videocam-outline" size={28} color="white" />
+                <Ionicons name="videocam-outline" size={28} color={colors.text} />
               </TouchableOpacity>
               <TouchableOpacity style={styles.iconButton}>
-                <Ionicons name="call-outline" size={24} color="white" />
+                <Ionicons name="call-outline" size={24} color={colors.text} />
               </TouchableOpacity>
               <TouchableOpacity style={styles.iconButton}>
-                <Ionicons name="ellipsis-vertical" size={28} color="white" />
+                <Ionicons name="ellipsis-vertical" size={28} color={colors.text} />
               </TouchableOpacity>
             </View>
           </View>
         </View>
 
         {/* Chat Messages */}
-        <View style={styles.chatArea}>
+        <View style={[styles.chatArea, { backgroundColor: colors.background }]}>
           <ScrollView 
+            ref={scrollViewRef}
             contentContainerStyle={styles.messagesContainer}
             keyboardShouldPersistTaps="handled"
           >
             {messages.map((msg) => (
-              <View key={msg.id} style={styles.messageBubble}>
+              <View 
+                key={msg.id} 
+                style={[
+                  styles.messageBubble, 
+                  msg.senderID === currentUserID ? styles.myMessage : styles.theirMessage,
+                  { 
+                    backgroundColor: msg.senderID === currentUserID ? '#7a92af' : colors.cardBackground,
+                  }
+                ]}
+              >
                 {msg.file && (
                   <Image
                     source={{ uri: msg.file.uri }}
@@ -334,8 +477,24 @@ const ChatRoom = () => {
                     resizeMode="contain"
                   />
                 )}
-                {msg.text && <Text style={styles.messageText}>{msg.text}</Text>}
-                <Text style={styles.timestamp}>
+                <Text 
+                  style={[
+                    styles.messageText, 
+                    { 
+                      color: msg.senderID === currentUserID ? '#fff' : colors.text
+                    }
+                  ]}
+                >
+                  {msg.text}
+                </Text>
+                <Text 
+                  style={[
+                    styles.timestamp, 
+                    { 
+                      color: msg.senderID === currentUserID ? 'rgba(255,255,255,0.8)' : colors.subText 
+                    }
+                  ]}
+                >
                   {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </Text>
               </View>
@@ -351,48 +510,48 @@ const ChatRoom = () => {
           onRequestClose={() => setShowAttachmentOptions(false)}
         >
           <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
+            <View style={[styles.modalContent, { backgroundColor: colors.cardBackground }]}>
               <TouchableOpacity style={styles.optionButton} onPress={pickImage}>
-                <Ionicons name="image" size={28} color="#00c9bd" />
-                <Text style={styles.optionText}>Photo & Video</Text>
+                <Ionicons name="image" size={28} color="#7a92af" />
+                <Text style={[styles.optionText, { color: colors.text }]}>Photo & Video</Text>
               </TouchableOpacity>
               
               <TouchableOpacity style={styles.optionButton} onPress={pickDocument}>
-                <Ionicons name="document" size={28} color="#00c9bd" />
-                <Text style={styles.optionText}>Document</Text>
+                <Ionicons name="document" size={28} color="#7a92af" />
+                <Text style={[styles.optionText, { color: colors.text }]}>Document</Text>
               </TouchableOpacity>
               
               <TouchableOpacity
                 style={styles.cancelButton}
                 onPress={() => setShowAttachmentOptions(false)}
               >
-                <Text style={styles.cancelText}>Cancel</Text>
+                <Text style={[styles.cancelText, { color: "#7a92af" }]}>Cancel</Text>
               </TouchableOpacity>
             </View>
           </View>
         </Modal>
 
         {/* Input Container */}
-        <View style={styles.inputWrapper}>
-          <View style={styles.inputContainer}>
+        <View style={[styles.inputWrapper, { backgroundColor: colors.background }]}>
+          <View style={[styles.inputContainer, { backgroundColor: colors.input }]}>
             <TouchableOpacity 
               style={styles.attachmentButton} 
               onPress={handleAttachmentPress}
             >
-              <Ionicons name="add" size={28} color="#00c9bd" />
+              <Ionicons name="add" size={28} color="#7a92af" />
             </TouchableOpacity>
 
             <TextInput
-              style={styles.input}
+              style={[styles.input, { color: colors.text }]}
               placeholder="Message"
-              placeholderTextColor="#888"
+              placeholderTextColor={colors.subText}
               value={message}
               onChangeText={setMessage}
               multiline
-              keyboardAppearance="dark"
+              keyboardAppearance={isDark ? "dark" : "light"}
             />
 
-            <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
+            <TouchableOpacity style={[styles.sendButton, { backgroundColor: "#7a92af" }]} onPress={handleSend}>
               <Ionicons 
                 name={message || selectedFile ? "paper-plane" : "mic-outline"} 
                 size={24} 
@@ -414,11 +573,14 @@ const ChatRoom = () => {
           <Animated.View 
             style={[
               styles.profileSheet,
-              { transform: [{ translateY: profileTranslateY }] }
+              { 
+                backgroundColor: colors.cardBackground,
+                transform: [{ translateY: profileTranslateY }] 
+              }
             ]}
           >
             <View {...profilePanResponder.panHandlers} style={styles.swipeHandler}>
-              <View style={styles.dragIndicator} />
+              <View style={[styles.dragIndicator, { backgroundColor: colors.text }]} />
             </View>
             
             {/* Profile Info */}
@@ -436,79 +598,69 @@ const ChatRoom = () => {
               
               <View style={styles.profileInfo}>
                 <View style={styles.nameContainer}>
-                  <Text style={styles.profileName}>{name}</Text>
+                  <Text style={[styles.profileName, { color: colors.text }]}>{name}</Text>
                   <View style={styles.menuButtonContainer}>
                     <TouchableOpacity 
                       style={styles.menuButton} 
                       onPress={toggleProfileMenu}
                     >
-                      <Ionicons name="ellipsis-vertical" size={24} color="white" />
+                      <Ionicons name="ellipsis-vertical" size={24} color={colors.text} />
                     </TouchableOpacity>
                     
                     {/* Profile Menu Dropdown */}
                     {showProfileMenu && (
-                      <View style={styles.profileMenuDropdown}>
+                      <View style={[styles.profileMenuDropdown, { backgroundColor: colors.menuBackground }]}>
                         <TouchableOpacity 
                           style={styles.profileMenuItem}
                           onPress={() => handleProfileMenuOption('copy')}
                         >
-                          <Ionicons name="copy-outline" size={20} color="white" style={styles.menuItemIcon} />
-                          <Text style={styles.menuItemText}>Copy Username</Text>
+                          <Ionicons name="copy-outline" size={20} color={colors.text} style={styles.menuItemIcon} />
+                          <Text style={[styles.menuItemText, { color: colors.text }]}>Copy Username</Text>
                         </TouchableOpacity>
                         
                         <TouchableOpacity 
                           style={styles.profileMenuItem}
                           onPress={() => handleProfileMenuOption('group')}
                         >
-                          <Ionicons name="people-outline" size={20} color="white" style={styles.menuItemIcon} />
-                          <Text style={styles.menuItemText}>Add to Group</Text>
+                          <Ionicons name="people-outline" size={20} color={colors.text} style={styles.menuItemIcon} />
+                          <Text style={[styles.menuItemText, { color: colors.text }]}>Add to Group</Text>
                         </TouchableOpacity>
                         
                         <TouchableOpacity 
                           style={styles.profileMenuItem}
                           onPress={() => handleProfileMenuOption('block')}
                         >
-                          <Ionicons name="ban-outline" size={20} color="#ff5252" style={styles.menuItemIcon} />
-                          <Text style={[styles.menuItemText, { color: '#ff5252' }]}>Block User</Text>
-                        </TouchableOpacity>
-                        
-                        <TouchableOpacity 
-                          style={styles.profileMenuItem}
-                          onPress={() => handleProfileMenuOption('report')}
-                        >
-                          <Ionicons name="flag-outline" size={20} color="#ff5252" style={styles.menuItemIcon} />
-                          <Text style={[styles.menuItemText, { color: '#ff5252' }]}>Report User</Text>
+                          <Ionicons name="ban-outline" size={20} color={colors.danger} style={styles.menuItemIcon} />
+                          <Text style={[styles.menuItemText, { color: colors.danger }]}>Delete User</Text>
                         </TouchableOpacity>
                       </View>
                     )}
                   </View>
                 </View>
                 
-                <Text style={styles.description}>
+                <Text style={[styles.description, { color: colors.text }]}>
                   Nickname
                 </Text>
               </View>
             </View>
             
-            <View style={styles.profileActions}>
+            <View style={[styles.profileActions, { borderTopColor: isDark ? '#333' : '#e0e0e0' }]}>
               <TouchableOpacity style={styles.profileAction}>
-                <Ionicons name="call-outline" size={24} color="white" />
-                <Text style={styles.actionText}>Call</Text>
+                <Ionicons name="call-outline" size={24} color={colors.text} />
+                <Text style={[styles.actionText, { color: colors.text }]}>Call</Text>
               </TouchableOpacity>
               
               <TouchableOpacity style={styles.profileAction}>
-                <Ionicons name="videocam-outline" size={24} color="white" />
-                <Text style={styles.actionText}>Video</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity style={styles.profileAction}>
-                <Ionicons name="search-outline" size={24} color="white" />
-                <Text style={styles.actionText}>Search</Text>
+                <Ionicons name="videocam-outline" size={24} color={colors.text} />
+                <Text style={[styles.actionText, { color: colors.text }]}>Video</Text>
               </TouchableOpacity>
             </View>
-            <View style={{padding:20,paddingHorizontal:24}}>
-              <Text style={{color:'white',fontWeight:'bold',fontSize:20}}>Bio:</Text>
-              <Text style={{color:'white',fontSize:18}}>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam commodo neque sit amet convallis rutrum. Proin eget arcu vitae justo semper dictum quis ac ex. </Text>
+            
+            <View style={{padding:20, paddingHorizontal:24}}>
+              <Text style={{color: colors.text, fontWeight:'bold', fontSize:20}}>Bio:</Text>
+              <Text style={{color: colors.text, fontSize:18}}>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam commodo neque sit amet convallis rutrum. Proin eget arcu vitae justo semper dictum quis ac ex.
+              </Text>
             </View>
           </Animated.View>
         </>
@@ -520,20 +672,16 @@ const ChatRoom = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#1E1E1E',
   },
   keyboardVisible: {
-    backgroundColor: '#1E1E1E',
   },
   container: {
     flex: 1,
-    backgroundColor: '#1E1E1E',
   },
   header: {
     paddingTop: 40,
     paddingHorizontal: 10,
     paddingBottom: 15,
-    backgroundColor: '#2B2D31',
   },
   headerContent: {
     flexDirection: 'row',
@@ -573,10 +721,8 @@ const styles = StyleSheet.create({
     height: 12,
     borderRadius: 6,
     borderWidth: 2,
-    borderColor: '#2B2D31',
   },
   headerText: {
-    color: 'white',
     fontSize: 20,
     flex: 1,
   },
@@ -589,26 +735,29 @@ const styles = StyleSheet.create({
   },
   chatArea: {
     flex: 1,
-    backgroundColor: '#1E1E1E',
   },
   messagesContainer: {
     padding: 15,
     paddingBottom: 20,
   },
   messageBubble: {
-    backgroundColor: '#2d2d2d',
     borderRadius: 15,
     padding: 12,
     marginVertical: 5,
     maxWidth: '80%',
+  },
+  myMessage: {
+    alignSelf: 'flex-end',
+    borderBottomRightRadius: 4,
+  },
+  theirMessage: {
     alignSelf: 'flex-start',
+    borderBottomLeftRadius: 4,
   },
   messageText: {
-    color: 'white',
     fontSize: 16,
   },
   timestamp: {
-    color: '#888',
     fontSize: 12,
     marginTop: 5,
     alignSelf: 'flex-end',
@@ -620,7 +769,6 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   inputWrapper: {
-    backgroundColor: '#1E1E1E',
     paddingHorizontal: 10,
     paddingBottom: 10,
     paddingTop: 5,
@@ -630,12 +778,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 10,
     paddingVertical: 8,
-    backgroundColor: '#2d2d2d',
     borderRadius: 25,
   },
   input: {
     flex: 1,
-    color: 'white',
     maxHeight: 100,
     paddingHorizontal: 15,
     fontSize: 16,
@@ -646,7 +792,6 @@ const styles = StyleSheet.create({
     padding: 6,
   },
   sendButton: {
-    backgroundColor: '#00c9bd',
     borderRadius: 100,
     padding: 10,
     marginLeft: 8,
@@ -657,7 +802,6 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#2d2d2d',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
@@ -670,7 +814,6 @@ const styles = StyleSheet.create({
     borderBottomColor: '#3d3d3d',
   },
   optionText: {
-    color: 'white',
     fontSize: 16,
     marginLeft: 15,
   },
@@ -680,7 +823,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   cancelText: {
-    color: '#00c9bd',
     fontSize: 16,
     fontWeight: 'bold',
   },
@@ -700,7 +842,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: '#2B2D31',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     zIndex: 2,
@@ -716,7 +857,6 @@ const styles = StyleSheet.create({
   dragIndicator: {
     width: 60,
     height: 6,
-    backgroundColor: 'white',
     borderRadius: 3,
   },
   profileContainer: {
@@ -753,7 +893,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   profileName: {
-    color: 'white',
     fontSize: 22,
     fontWeight: 'bold',
   },
@@ -764,7 +903,6 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   description: {
-    color: 'white',
     fontSize: 18,
   },
   profileActions: {
@@ -773,13 +911,11 @@ const styles = StyleSheet.create({
     marginTop: 30,
     paddingTop: 20,
     borderTopWidth: 1,
-    borderTopColor: '#333',
   },
   profileAction: {
     alignItems: 'center',
   },
   actionText: {
-    color: 'white',
     marginTop: 8,
   },
   
@@ -789,7 +925,6 @@ const styles = StyleSheet.create({
     right: 0,
     top: 35,
     width: 180,
-    backgroundColor: '#3a3a3a',
     borderRadius: 8,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -810,7 +945,6 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   menuItemText: {
-    color: 'white',
     fontSize: 14,
   },
 });

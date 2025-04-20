@@ -78,12 +78,12 @@ const GradedTasks = () => {
               styles.filterButton, 
               { backgroundColor: colors.cardBackground },
               selectedGroup === 'all' && {
-        backgroundColor: colors.input, // Use your active color from theme
+        backgroundColor: '#7a92af', // Use your active color from theme
       }
             ]}
             onPress={() => setSelectedGroup('all')}
           >
-            <Text style={[styles.filterText, { color: colors.text }]}>All Groups</Text>
+            <Text style={[styles.filterText, { color: 'white'}]}>All Groups</Text>
           </TouchableOpacity>
           
           {groups.map(group => (
@@ -93,12 +93,12 @@ const GradedTasks = () => {
                 styles.filterButton, 
                 { backgroundColor: colors.cardBackground },
                 selectedGroup === group && {
-        backgroundColor: colors.input, // Use your active color from theme
+        backgroundColor: '#7a92af', // Use your active color from theme
       }
               ]}
               onPress={() => setSelectedGroup(group)}
             >
-              <Text style={[styles.filterText, { color: colors.text }]}>{group}</Text>
+              <Text style={[styles.filterText, { color: 'white' }]}>{group}</Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
   filterButton: {
     paddingVertical: 6,
     paddingHorizontal: 14,
-    borderRadius: 16,
+    borderRadius: 8,
     marginRight: 10,
   },
   filterText: {

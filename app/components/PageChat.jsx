@@ -16,6 +16,7 @@ import TaskCard from "./Repeats/TaskCard";
 import tasks from '../tasks.json';
 import users from '../users.json'; // Import users data
 import Text from './CustomText';
+import { useTheme } from './ThemeContext'; // Import the useTheme hook
 
 // Color generation utility - creates a deterministic color from a string
 const generateConsistentColor = (str) => {
@@ -30,6 +31,7 @@ const generateConsistentColor = (str) => {
 const PageChat = () => {
   const navigation = useNavigation();
   const { height } = Dimensions.get("window");
+  const { colors, isDark, toggleTheme } = useTheme(); // Get theme context
 
   const [filter, setFilter] = useState('all');
   const [selected, setSelected] = useState(false);
@@ -211,23 +213,117 @@ const PageChat = () => {
       </View>
     );
   };
+  
+  // Filter tasks based on selected filter
+  const getFilteredTasks = () => {
+    const allTaskCategories = categorizeTasks();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const endOfToday = new Date(today);
+    endOfToday.setHours(23, 59, 59, 999);
+    
+    const endOfWeek = new Date(today);
+    // Set to the end of this week (next Sunday)
+    endOfWeek.setDate(today.getDate() + (7 - today.getDay()));
+    endOfWeek.setHours(23, 59, 59, 999);
+    
+    const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59, 999);
+    
+    // By default, don't include completed tasks in any filter
+    let filteredTasks = [];
+    
+    switch (filter) {
+      case 'today':
+        filteredTasks = [...allTaskCategories.overdue, ...allTaskCategories.dueSoon, ...allTaskCategories.upcoming]
+          .filter(task => {
+            const taskDate = new Date(task.dueDate);
+            return taskDate >= today && taskDate <= endOfToday;
+          });
+        break;
+      case 'week':
+        filteredTasks = [...allTaskCategories.overdue, ...allTaskCategories.dueSoon, ...allTaskCategories.upcoming]
+          .filter(task => {
+            const taskDate = new Date(task.dueDate);
+            return taskDate >= today && taskDate <= endOfWeek;
+          });
+        break;
+      case 'month':
+        filteredTasks = [...allTaskCategories.overdue, ...allTaskCategories.dueSoon, ...allTaskCategories.upcoming]
+          .filter(task => {
+            const taskDate = new Date(task.dueDate);
+            return taskDate >= today && taskDate <= endOfMonth;
+          });
+        break;
+      case 'overdue':
+        filteredTasks = allTaskCategories.overdue;
+        break;
+      case 'all':
+      default:
+        // Still exclude completed tasks from 'all' filter
+        filteredTasks = [
+          ...allTaskCategories.overdue,
+          ...allTaskCategories.dueSoon,
+          ...allTaskCategories.upcoming
+        ];
+        break;
+    }
+    
+    // Sort by date (newest first)
+    return filteredTasks.sort((a, b) => new Date(b.dueDate) - new Date(a.dueDate));
+  };
+  
+  // Filter button component
+  const FilterButton = ({ title, value }) => (
+    <TouchableOpacity
+      onPress={() => setFilter(value)}
+      style={[
+        styles.filterButton,
+        {
+          backgroundColor: filter === value ? '#7a92af' : 'transparent',
+          borderColor: '#7a92af',
+          borderWidth: 1,
+        },
+      ]}
+    >
+      <Text
+        style={[
+          styles.filterButtonText,
+          { color: filter === value ? 'white' : colors.text },
+        ]}
+      >
+        {title}
+      </Text>
+    </TouchableOpacity>
+  );
 
   return (
-    <View style={[styles.safeArea, { height: dimensions.heightWindow }]}>
+    <View style={[styles.safeArea, { 
+      height: dimensions.heightWindow,
+      backgroundColor: colors.background, // Apply theme background color
+    }]}>
       <View style={styles.container}>
-        <View style={styles.mainContent}>
+        <View style={[styles.mainContent, { backgroundColor: colors.background }]}>
           <View style={styles.header}>
-            <Text style={styles.title}>Dashboard</Text>
-            {/* Updated bell icon with custom animation navigation */}
-            <TouchableOpacity onPress={navigateToNotifications}>
-              <Ionicons size={32} color={'white'} name="notifications-outline" />
-            </TouchableOpacity>
+            <Text style={[styles.title, { color: colors.text }]}>Dashboard</Text>
+            <View style={styles.headerButtons}>
+              <TouchableOpacity onPress={toggleTheme} style={styles.themeButton}>
+                <Ionicons 
+                  size={28} 
+                  color={colors.text} 
+                  name={isDark ? "sunny-outline" : "moon-outline"} 
+                />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={navigateToNotifications}>
+                <Ionicons size={32} color={colors.text} name="notifications-outline" />
+              </TouchableOpacity>
+            </View>
           </View>
 
           <ScrollView>
             {/* Friends Section - Updated to display online users from JSON */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Friends</Text>
+            <View style={[styles.section, { backgroundColor: colors.cardBackground }]}>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>Friends</Text>
               <View style={styles.friendsContainer}>
                 {onlineUsers.length > 0 ? (
                   <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -258,7 +354,7 @@ const PageChat = () => {
                                 source={avatarSource}
                               />
                             )}
-                            <Text style={{ color: "white", textAlign: "center", marginTop: 4 }}>
+                            <Text style={{ color: colors.text, textAlign: "center", marginTop: 4 }}>
                               {user.name.split(' ')[0]} {/* Show only first name */}
                             </Text>
                             <View style={styles.onlineIndicator} />
@@ -269,8 +365,8 @@ const PageChat = () => {
                   </ScrollView>
                 ) : (
                   <View style={styles.noOnlineUsersContainer}>
-                    <Ionicons name="people-outline" size={24} color="#888" />
-                    <Text style={styles.noOnlineUsersText}>
+                    <Ionicons name="people-outline" size={24} color={colors.subText} />
+                    <Text style={[styles.noOnlineUsersText, { color: colors.subText }]}>
                       No friends are online at the moment
                     </Text>
                   </View>
@@ -279,95 +375,101 @@ const PageChat = () => {
             </View> 
 
             {/* Groups Section */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Groups</Text>
+            <View style={[styles.section, { backgroundColor: colors.cardBackground }]}>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>Groups</Text>
               <View style={styles.groupsContainer}>
-              <View
-            style={{
-              flexDirection: "row",
-            }}
-            >
-            <View style={{ marginHorizontal: 12 }}>
-              <View
-                style={{
-                  backgroundColor: "lightgreen",
-                  marginTop: 10,
-                  width: 60,
-                  height: 60,
-                  borderRadius: 100,
-                }}
-                ></View>
-              <Text style={{ color: "white", textAlign: "center" }}>
-                group1
-              </Text>
-            </View>
-            <View style={{ marginHorizontal: 12 }}>
-              <View
-                style={{
-                  backgroundColor: "lightblue",
-                  marginTop: 10,
-                  width: 60,
-                  height: 60,
-                  borderRadius: 100,
-                }}
-                ></View>
-              <Text style={{ color: "white", textAlign: "center" }}>
-                group2
-              </Text>
-            </View>
-            <View style={{ marginHorizontal: 12 }}>
-              <View
-                style={{
-                  backgroundColor: "lightyellow",
-                  marginTop: 10,
-                  width: 60,
-                  height: 60,
-                  borderRadius: 100,
-                }}
-                ></View>
-              <Text style={{ color: "white", textAlign: "center" }}>
-                group3
-              </Text>
-            </View>
-          </View>
+                <View style={{ flexDirection: "row" }}>
+                  <View style={{ marginHorizontal: 12 }}>
+                    <View
+                      style={{
+                        backgroundColor: "lightgreen",
+                        marginTop: 10,
+                        width: 60,
+                        height: 60,
+                        borderRadius: 100,
+                      }}
+                    ></View>
+                    <Text style={{ color: colors.text, textAlign: "center" }}>
+                      group1
+                    </Text>
+                  </View>
+                  <View style={{ marginHorizontal: 12 }}>
+                    <View
+                      style={{
+                        backgroundColor: "lightblue",
+                        marginTop: 10,
+                        width: 60,
+                        height: 60,
+                        borderRadius: 100,
+                      }}
+                    ></View>
+                    <Text style={{ color: colors.text, textAlign: "center" }}>
+                      group2
+                    </Text>
+                  </View>
+                  <View style={{ marginHorizontal: 12 }}>
+                    <View
+                      style={{
+                        backgroundColor: "lightyellow",
+                        marginTop: 10,
+                        width: 60,
+                        height: 60,
+                        borderRadius: 100,
+                      }}
+                    ></View>
+                    <Text style={{ color: colors.text, textAlign: "center" }}>
+                      group3
+                    </Text>
+                  </View>
+                </View>
               </View>
             </View>
 
-            {/* Tasks Section - Updated to display only overdue and due soon tasks from newest to oldest */}
+            {/* Tasks Section with filters */}
             <View style={styles.tasksSection}>
-              <Text style={styles.sectionTitle}>Tasks</Text>
+              <View style={styles.tasksSectionHeader}>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>Tasks</Text>
+              </View>
+              
+              {/* Task filters */}
+              <ScrollView 
+                horizontal 
+                showsHorizontalScrollIndicator={false} 
+                style={styles.filtersContainer}
+                contentContainerStyle={styles.filtersContentContainer}
+              >
+                <FilterButton title="All" value="all" />
+                <FilterButton title="Today" value="today" />
+                <FilterButton title="This Week" value="week" />
+                <FilterButton title="This Month" value="month" />
+                <FilterButton title="Overdue" value="overdue" />
+              </ScrollView>
+              
               <View style={styles.tasksContainer}>
-                {/* Display only overdue tasks, sorted newest to oldest */}
-                {categorizeTasks().overdue.map(task => {
-                  const dueDate = new Date(task.dueDate);
-                  return (
-                    <TaskCard
-                      key={task.id}
-                      title={task.title}
-                      date={dueDate.toLocaleDateString('en-CA')}
-                      clock={dueDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      status={task.status}
-                      description={task.description}
-                      assignedBy={task.assignedBy}
-                    />
-                  );
-                })}
-                
-                {/* Display only due soon tasks, sorted newest to oldest */}
-                {categorizeTasks().dueSoon.map(task => {
-                  const dueDate = new Date(task.dueDate);
-                  return (
-                    <TaskCard
-                      key={task.id}
-                      title={task.title}
-                      date={dueDate.toLocaleDateString('en-CA')}
-                      clock={dueDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      status={task.status}
-                      description={task.description}
-                      assignedBy={task.assignedBy}
-                    />
-                  );
-                })}
+                {getFilteredTasks().length > 0 ? (
+                  getFilteredTasks().map(task => {
+                    const dueDate = new Date(task.dueDate);
+                    return (
+                      <TaskCard
+                        key={task.id}
+                        title={task.title}
+                        date={dueDate.toLocaleDateString('en-CA')}
+                        clock={dueDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        status={task.status}
+                        description={task.description}
+                        assignedBy={task.assignedBy}
+                        theme={colors} // Pass theme colors to TaskCard
+                      />
+                    );
+                  })
+                ) : (
+                  <View style={[styles.noTasksContainer, { backgroundColor: colors.cardBackground }]}>
+                    <Ionicons name="calendar-outline" size={32} color={colors.subText} />
+                    <Text style={[styles.noTasksText, { color: colors.subText }]}>
+                      No tasks found for this filter
+                    </Text>
+                  </View>
+                )}
               </View>
             </View>
           </ScrollView>
@@ -380,17 +482,14 @@ const PageChat = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#1E1E1E",
   },
   section: {
     marginTop: 20,
-    backgroundColor: '#3F414A',
     paddingHorizontal: 10,
     borderRadius: 24,
     paddingVertical: 16,
   },
   sectionTitle: {
-    color: "white",
     fontSize: 26,
     fontFamily: "Lexend-SemiBold",
     fontWeight: 'bold',
@@ -403,12 +502,10 @@ const styles = StyleSheet.create({
   },
   mainContent: {
     flex: 1,
-    backgroundColor: "#1E1E1E",
     paddingTop: 30,
     paddingHorizontal: 20,
   },
   title: {
-    color: "white",
     fontSize: 34,
     fontFamily:'Lexend-Bold'
   },
@@ -417,8 +514,37 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  headerButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  themeButton: {
+    marginRight: 16,
+  },
   tasksSection: {
     marginTop: 20,
+  },
+  tasksSectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  filtersContainer: {
+    marginTop: 8,
+    marginBottom: 16,
+  },
+  filtersContentContainer: {
+    paddingHorizontal: 10,
+  },
+  filterButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 10,
+    marginRight: 10,
+  },
+  filterButtonText: {
+    fontSize: 14,
+    fontFamily: 'Lexend-Medium',
   },
   tasksContainer: {
     marginVertical: 10,
@@ -449,10 +575,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   noOnlineUsersText: {
-    color: '#888',
     marginLeft: 8,
     fontSize: 16,
     fontFamily: 'Lexend-Medium',
+  },
+  noTasksContainer: {
+    borderRadius: 16,
+    padding: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  noTasksText: {
+    fontSize: 16,
+    fontFamily: 'Lexend-Medium',
+    marginTop: 8,
   }
 });
 

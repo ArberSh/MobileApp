@@ -1,25 +1,85 @@
 import React from 'react';
-import { View,  StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import Text from './CustomText';
-
+import { useTheme } from './ThemeContext';
 
 const Mentions = ({ notifications, markAsRead, formatRelativeTime }) => {
+  const { colors } = useTheme();
+  
+  const themedStyles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+      padding: 10
+    },
+    emptyContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    emptyText: {
+      color: colors.subText,
+      fontSize: 16,
+      fontFamily: 'Lexend',
+    },
+    unreadDot: {
+      backgroundColor: colors.unreadDot,
+    },
+    notificationDot: {
+      width: 10,
+      height: 10,
+      borderRadius: 5,
+      backgroundColor: colors.cardBackground,
+      marginRight: 16,
+      marginTop: 5,
+    },
+    notificationContent: {
+      flex: 1,
+    },
+    notificationTitle: {
+      color: colors.text,
+      fontSize: 18,
+      fontFamily: 'Lexend-SemiBold',
+      marginBottom: 4,
+    },
+    notificationMessage: {
+      color: colors.text,
+      fontSize: 16,
+      fontFamily: 'Lexend',
+      marginBottom: 6,
+      opacity: 0.8,
+    },
+    notificationTime: {
+      color: colors.subText,
+      fontSize: 14,
+      fontFamily: 'Lexend',
+    },
+    notificationItem: {
+      borderRadius: 20,
+      flexDirection: 'row',
+      padding: 16,
+      borderBottomWidth: 1,
+      backgroundColor: colors.notificationItem,
+      marginBottom: 10
+    },
+  });
+
   const renderItem = ({ item }) => (
     <TouchableOpacity 
-      style={styles.notificationItem}
+      style={themedStyles.notificationItem}
       onPress={() => markAsRead(item.id)}
     >
-      <View style={[styles.notificationDot, !item.read && styles.unreadDot]} />
-      <View style={styles.notificationContent}>
-        <Text style={styles.notificationTitle}>{item.title}</Text>
-        <Text style={styles.notificationMessage}>{item.message}</Text>
-        <Text style={styles.notificationTime}>{formatRelativeTime(item.time)}</Text>
+      <View style={[themedStyles.notificationDot, !item.read && themedStyles.unreadDot]} />
+      <View style={themedStyles.notificationContent}>
+        <Text style={themedStyles.notificationTitle}>{item.title}</Text>
+        <Text style={themedStyles.notificationMessage}>{item.message}</Text>
+        <Text style={themedStyles.notificationTime}>{formatRelativeTime(item.time)}</Text>
       </View>
     </TouchableOpacity>
   );
 
   return (
-    <View style={styles.container}>
+    <View style={themedStyles.container}>
       {notifications.length > 0 ? (
         <FlatList
           data={notifications}
@@ -27,70 +87,12 @@ const Mentions = ({ notifications, markAsRead, formatRelativeTime }) => {
           keyExtractor={item => item.id}
         />
       ) : (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>No mentions</Text>
+        <View style={themedStyles.emptyContainer}>
+          <Text style={themedStyles.emptyText}>No mentions</Text>
         </View>
       )}
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#1E1E1E',
-    padding:10
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  emptyText: {
-    color: '#9DA0A8',
-    fontSize: 16,
-    fontFamily: 'Lexend',
-  },
-  unreadDot: {
-    backgroundColor: 'white',
-  },
-  notificationDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#3F414A',
-    marginRight: 16,
-    marginTop: 5,
-  },
-  notificationContent: {
-    flex: 1,
-  },
-  notificationTitle: {
-    color: 'white',
-    fontSize: 18,
-    fontFamily: 'Lexend-SemiBold',
-    marginBottom: 4,
-  },
-  notificationMessage: {
-    color: '#CCCCCC',
-    fontSize: 16,
-    fontFamily: 'Lexend',
-    marginBottom: 6,
-  },
-  notificationTime: {
-    color: '#9DA0A8',
-    fontSize: 14,
-    fontFamily: 'Lexend',
-  },
-  notificationItem: {
-    borderRadius:20,
-    flexDirection: 'row',
-    padding: 16,
-    borderBottomWidth: 1,
-    backgroundColor: '#3F414A',
-    marginBottom:10
-  },
-});
-
 
 export default Mentions;
