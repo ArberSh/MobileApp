@@ -22,6 +22,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import Text from './CustomText';
 import { useTheme } from './ThemeContext'; // Import useTheme hook
+import messageData from '../messages.json';
 
 const { width, height } = Dimensions.get('window');
 
@@ -64,39 +65,33 @@ const ChatRoom = () => {
   }, []);
   
   const fetchMessages = async () => {
-    try {
-      // In a real app, this would be a fetch or import of your JSON file
-      // For now, we'll simulate loading messages
-      
-      // You could use require if the file is local:
-      // const messageData = require('./messages.json');
-      
-      // Or fetch it from an API:
-      // const response = await fetch('your-api-url/messages.json');
-      // const messageData = await response.json();
-      
-      // For this example, we'll simulate processing the data
-      // by transforming it to match our UI needs
-      
-      // This assumes we're working with direct messages only for simplicity
-      const processedMessages = messageData
-        .filter(msg => msg.type === 'direct') // Filter to direct messages only
-        .map(msg => ({
-          id: msg.time, // Using timestamp as ID
-          senderID: msg.senderID,
-          text: msg.message,
-          timestamp: msg.time,
-          isCurrentUser: msg.senderID === currentUserID
-        }));
-      
-      setMessages(processedMessages);
-      
-      // Scroll to bottom when messages are loaded
-      setTimeout(scrollToBottom, 100);
-    } catch (error) {
-      console.error("Error loading messages:", error);
-    }
-  };
+  try {
+    // Get the ID of the person we're chatting with from route params
+    const receiverID = route.params?.id || "2"; // Default to user 2 if no ID provided
+    
+    // Filter messages to show only the conversation between current user and selected user
+    const processedMessages = messageData
+      .filter(msg => 
+        msg.type === 'direct' && 
+        ((msg.senderID === currentUserID && msg.receiverID === receiverID) ||
+         (msg.receiverID === currentUserID && msg.senderID === receiverID))
+      )
+      .map(msg => ({
+        id: msg.time,
+        senderID: msg.senderID,
+        text: msg.message,
+        timestamp: msg.time,
+        isCurrentUser: msg.senderID === currentUserID
+      }));
+    
+    setMessages(processedMessages);
+    
+    // Scroll to bottom when messages are loaded
+    setTimeout(scrollToBottom, 100);
+  } catch (error) {
+    console.error("Error loading messages:", error);
+  }
+};
   
   const scrollToBottom = () => {
     if (scrollViewRef.current) {

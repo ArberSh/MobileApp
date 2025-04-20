@@ -191,7 +191,7 @@ const AccountScreen = () => {
         <MenuOption 
           icon="settings-outline" 
           title="Accessibility" 
-          onPress={() => navigation.navigate('Settings')}
+          onPress={() => navigation.navigate('Test')}
           />
         
         <Text style={[styles.menuSectionTitle, { color: colors.subText }]}>Actions</Text>

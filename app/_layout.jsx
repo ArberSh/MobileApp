@@ -22,7 +22,7 @@ import CreateNewGroup from './components/CreateNewGroup';
 import { FriendsProvider } from './components/FriendsContext';
 import { GroupsProvider } from './components/GroupsContext';
 import TaskMoreDetail from './components/TaskMoreDetail';
-import Settings from './components/Settings';
+import Test from './components/Test';
 import Appearance from './components/Appearance';
 import { ThemeProvider } from './components/ThemeContext';
 import { useTheme } from './components/ThemeContext';
@@ -128,7 +128,7 @@ const _layout = () => {
                 <Stack.Screen name="CreateNewChat" component={CreateNewChat} />
                 <Stack.Screen name="CreateNewGroup" component={CreateNewGroup} />
                 <Stack.Screen name="TaskMoreDetail" component={TaskMoreDetail} />
-                <Stack.Screen name="Settings" component={Settings} />
+                <Stack.Screen name="Test" component={Test} />
                 <Stack.Screen name="Appearance" component={Appearance} />
                 <Stack.Screen 
                   name="EditProfile" 

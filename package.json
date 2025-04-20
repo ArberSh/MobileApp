@@ -6,13 +6,16 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "install-safe": "npm install --legacy-peer-deps"
   },
   "dependencies": {
     "@bottom-tabs/react-navigation": "^0.8.2",
     "@expo/react-native-navigator": "^0.5.2",
     "@expo/vector-icons": "^14.0.4",
-    "@react-native-async-storage/async-storage": "^1.23.1",
+    "@expo/webpack-config": "^19.0.0",
+    "@react-native-async-storage/async-storage": "1.23.1",
+    "@react-native-community/slider": "4.5.5",
     "@react-navigation/bottom-tabs": "^7.2.0",
     "@react-navigation/drawer": "^7.1.2",
     "@react-navigation/material-top-tabs": "^7.1.0",
@@ -21,6 +24,7 @@
     "expo": "^52.0.46",
     "expo-checkbox": "~4.0.1",
     "expo-constants": "^17.0.8",
+    "expo-dev-client": "~5.0.20",
     "expo-document-picker": "~13.0.3",
     "expo-font": "~13.0.4",
     "expo-image-picker": "~16.0.6",
@@ -28,6 +32,7 @@
     "expo-router": "^4.0.20",
     "expo-splash-screen": "^0.29.24",
     "expo-status-bar": "~2.0.1",
+    "firebase": "^11.6.0",
     "npm": "^11.1.0",
     "react": "18.3.1",
     "react-native": "^0.76.9",
@@ -37,8 +42,11 @@
     "react-native-safe-area-context": "4.12.0",
     "react-native-screens": "~4.4.0",
     "react-native-splash-screen": "^3.3.0",
-    "react-native-vector-icons": "^10.2.0",
-    "@react-native-community/slider": "4.5.5"
+    "react-native-vector-icons": "^10.2.0"
+  },
+  "resolutions": {
+    "@expo/webpack-config": "19.0.1",
+    "expo": "52.0.46"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
