@@ -1,23 +1,109 @@
-import React from 'react';
-import { SafeAreaView, StyleSheet,  TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useState } from 'react';
+import { SafeAreaView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import { useFonts } from "expo-font";
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/core';
 import Text from './CustomText';
-
-
+import { useAuth } from './Auth';
 
 const Login = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({
+    email: '',
+    password: '',
+    general: ''
+  });
+  
+  const navigation = useNavigation();
+  const { login, resetPassword } = useAuth();
+
   const [fontsLoaded] = useFonts({
     "Lexend-Medium": require("../assets/fonts/Lexend/static/Lexend-Medium.ttf"),
     "Lexend-Bold": require("../assets/fonts/Lexend/static/Lexend-Bold.ttf"),
   });
 
   if (!fontsLoaded) {
-    return <Text>Loading...</Text>; // Display a fallback UI while fonts load
+    return <Text>Loading...</Text>;
   }
 
-  const navigation = useNavigation();
+  // Render error message below input field
+  const renderErrorMessage = (errorText) => {
+    if (!errorText) return null;
+    return (
+      <Text style={styles.errorText}>{errorText}</Text>
+    );
+  };
+
+  const handleLogin = async () => {
+    // Reset previous errors
+    setErrors({
+      email: '',
+      password: '',
+      general: ''
+    });
+
+    // Validate inputs
+    let hasError = false;
+    const newErrors = { email: '', password: '', general: '' };
+
+    if (!email) {
+      newErrors.email = 'Email is required';
+      hasError = true;
+    }
+
+    if (!password) {
+      newErrors.password = 'Password is required';
+      hasError = true;
+    }
+
+    if (hasError) {
+      setErrors(newErrors);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await login(email, password);
+      navigation.navigate("pagechat");
+    } catch (error) {
+      let errorMessage = "Failed to login. Please check your credentials.";
+      
+      if (error.code === 'auth/user-not-found') {
+        newErrors.email = "No user found with this email address.";
+      } else if (error.code === 'auth/wrong-password') {
+        newErrors.password = "Incorrect password.";
+      } else {
+        newErrors.general = errorMessage;
+      }
+      
+      setErrors(newErrors);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    // Reset previous errors
+    setErrors({
+      email: '',
+      password: '',
+      general: ''
+    });
+
+    if (!email) {
+      setErrors({...errors, email: 'Please enter your email address'});
+      return;
+    }
+
+    try {
+      await resetPassword(email);
+      setErrors({...errors, general: 'Password reset email sent!'});
+    } catch (error) {
+      setErrors({...errors, general: 'Failed to send password reset email. Please try again.'});
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -31,34 +117,45 @@ const Login = () => {
           placeholderTextColor="gray"
           style={styles.input}
           accessibilityLabel="Enter your email"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
         />
+        {renderErrorMessage(errors.email)}
+        
         <TextInput
           placeholder="Password"
           placeholderTextColor="gray"
           style={styles.input}
           accessibilityLabel="Enter your password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
         />
+        {renderErrorMessage(errors.password)}
+        
+        {/* General error or success message */}
+        {errors.general ? (
+          <Text style={[
+            styles.errorText, 
+            errors.general.includes('sent') ? styles.successText : null
+          ]}>
+            {errors.general}
+          </Text>
+        ) : null}
       </View>
       <View>
-        <TouchableOpacity>
-          <Text
-            style={{
-              fontFamily:'Lexend-Medium',
-              fontSize:16,
-              color:'#00c9bd',
-              alignSelf:'flex-end',
-              marginTop:12,
-            }}
-          >
-            Forgot your Password?
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={{
-          padding:16,
-          backgroundColor:'#00c9bd',
-          marginVertical:24,
-          borderRadius:8,
-        }}>
+        <TouchableOpacity 
+          style={{
+            padding:16,
+            backgroundColor: loading ? '#8ba5c4' : '#7a92af',
+            marginVertical:24,
+            borderRadius:8,
+          }}
+          onPress={handleLogin}
+          disabled={loading}
+        >
           <Text
             style={{
               fontFamily:'Lexend-Bold',
@@ -66,7 +163,9 @@ const Login = () => {
               textAlign:'center',
               fontSize:20,
             }}
-          >Sign in</Text>
+          >
+            {loading ? "Signing in..." : "Sign in"}
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity style={{
           padding:16,
@@ -83,59 +182,6 @@ const Login = () => {
             onPress={() => navigation.navigate("register")}
           >Create new account</Text>
         </TouchableOpacity>
-
-        <View 
-          style={{
-            marginVertical:16
-          }}
-        >
-          <Text
-            style={{
-              fontFamily:'Lexend-Medium',
-              color:'#00c9bd',
-              textAlign:'center',
-              fontSize:16,
-            }}
-          >Or continue with</Text>
-        </View>
-        <View
-          style={{
-            marginTop:8,
-            flexDirection:'row',
-            justifyContent: 'center',
-          }}
-        >
-          <TouchableOpacity
-            style={{
-              padding:8,
-              backgroundColor:'#1E1E1E',
-              borderRadius:4,
-              marginHorizontal:16
-            }}
-          >
-            <Ionicons name="logo-google" size={32} color="#00c9bd" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={{
-              padding:8,
-              backgroundColor:'#1E1E1E',
-              borderRadius:4,
-              marginHorizontal:16
-            }}
-          >
-            <Ionicons name="logo-facebook" size={32} color="#00c9bd" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={{
-              padding:8,
-              backgroundColor:'#1E1E1E',
-              borderRadius:4,
-              marginHorizontal:16
-            }}
-          >
-            <Ionicons name="logo-apple" size={32} color="#00c9bd" />
-          </TouchableOpacity>
-        </View>
       </View>
     </SafeAreaView>
   );
@@ -153,7 +199,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   title: {
-    color: "#00c9bd",
+    color: "#7a92af",
     fontFamily: "Lexend-Bold",
     fontSize: 30,
   },
@@ -173,11 +219,21 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "#1E1E1E",
     borderRadius: 5,
-    color: "black",
+    color: "white",
     marginTop:20,
     width:'95%'
   },
+  errorText: {
+    color: '#ff6347',
+    textAlign: 'left',
+    width: '95%',
+    marginTop: 5,
+    fontSize: 12,
+    fontFamily: "Lexend-Medium"
+  },
+  successText: {
+    color: '#7a92af'
+  }
 });
-
 
 export default Login;

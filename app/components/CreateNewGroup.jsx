@@ -302,7 +302,7 @@ const CreateNewGroup = () => {
                 style={[styles.cancelButton,{backgroundColor:colors.input}]}
                 onPress={() => navigation.goBack()}
               >
-                <Text style={[styles.buttonText,{backgroundColor:colors.text}]}>Cancel</Text>
+                <Text style={[styles.buttonText,{backgroundColor:colors.input,color:colors.text}]}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity 
                 style={styles.joinButton}
@@ -377,13 +377,13 @@ const CreateNewGroup = () => {
                 onPress={() => navigation.goBack()}
                 
               >
-                <Text style={[styles.buttonText,{backgroundColor:colors.input}]}>Cancel</Text>
+                <Text style={[styles.buttonText,{backgroundColor:colors.input,color:colors.text}]}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity 
                 style={styles.createButton}
                 onPress={handleCreateGroup}
               >
-                <Text style={[styles.buttonText,{color:colors.text}]}>Create Group</Text>
+                <Text style={[styles.buttonText,{color:'white'}]}>Create Group</Text>
               </TouchableOpacity>
             </View>
 

@@ -1,19 +1,29 @@
 import React, { useEffect, useState } from 'react';
-import { Dimensions, View, StyleSheet, TouchableOpacity, Image, Alert, ScrollView, TextInput, Clipboard, ToastAndroid, Platform } from 'react-native';
-import { Feather, Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { Dimensions, View, StyleSheet, TouchableOpacity, Image, ScrollView, TextInput, Clipboard, ToastAndroid, Platform, Alert } from 'react-native';
+import { Feather, Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import Text from './CustomText';
+import LetterAvatar from './LetterAvatar';
 import { useTheme } from './ThemeContext';
+import { useAuth } from './Auth';
+import { doc, updateDoc, getDoc } from 'firebase/firestore';
+import { firestore, storage } from '../firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const getPermission = async () => {
-  const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-  if (status !== 'granted') {
-    Alert.alert('Permission required', 'Please allow access to your photos to change your profile picture');
+  try {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission required', 'Please allow access to your photos to change your profile picture');
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error("Error getting permission:", error);
     return false;
   }
-  return true;
 };
 
 const AccountScreen = () => {
@@ -21,17 +31,19 @@ const AccountScreen = () => {
   const route = useRoute();
   const { width } = Dimensions.get('window');
   const [dimensions, setDimensions] = useState({ widthWindow: width });
-  const { colors, isDark } = useTheme(); // Use the theme
+  const { colors, isDark } = useTheme();
+  const { currentUser, logout } = useAuth();
 
   // Get profile updates from navigation params if available
   const updatedProfile = route.params?.updatedProfile;
   
-  const [profileImage, setProfileImage] = useState('https://i.pinimg.com/originals/dc/4f/40/dc4f402448b8b309879645aefa1dde46.jpg');
-  const [displayName, setDisplayName] = useState('Arber Shaska');
-  const [username, setUsername] = useState('arbershaska');
-  const [bio, setBio] = useState('Mobile app developer passionate about creating beautiful UI experiences. Working with React Native & Flutter.');
+  const [profileImage, setProfileImage] = useState(null);
+  const [displayName, setDisplayName] = useState('');
+  const [username, setUsername] = useState('');
+  const [bio, setBio] = useState('');
   const [isEditingBio, setIsEditingBio] = useState(false);
   const [showCopied, setShowCopied] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [fontsLoaded] = useFonts({
     'Lexend': require('../assets/fonts/Lexend/static/Lexend-Regular.ttf'),
@@ -40,12 +52,47 @@ const AccountScreen = () => {
     'Lexend-SemiBold': require('../assets/fonts/Lexend/static/Lexend-SemiBold.ttf')
   });
 
+  // Load user data from Firebase
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        if (currentUser && currentUser.uid) {
+          // Fetch the latest user data from Firestore to ensure we have the most up-to-date information
+          const userDoc = await getDoc(doc(firestore, "users", currentUser.uid));
+          
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            
+            // Set user data from Firestore document
+            setDisplayName(userData.displayName || '');
+            setUsername(userData.username || '');
+            setBio(userData.bio || '');
+            
+            // Set profile image if it exists
+            setProfileImage(userData.profilePicture || null);
+          } else {
+            console.warn("User document not found in Firestore");
+            // Fallback to auth user data
+            setDisplayName(currentUser.displayName || '');
+            setUsername(currentUser.email?.split('@')[0] || '');
+            setProfileImage(null);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        Alert.alert("Error", "Failed to load profile data");
+      }
+    };
+
+    fetchUserData();
+  }, [currentUser]);
+
   // Update profile if coming back from edit screen
   useEffect(() => {
     if (updatedProfile) {
-      setProfileImage(updatedProfile.image);
-      setDisplayName(updatedProfile.name);
-      setBio(updatedProfile.bio);
+      if (updatedProfile.image) setProfileImage(updatedProfile.image);
+      if (updatedProfile.name) setDisplayName(updatedProfile.name);
+      if (updatedProfile.bio !== undefined) setBio(updatedProfile.bio);
     }
   }, [updatedProfile]);
 
@@ -57,22 +104,82 @@ const AccountScreen = () => {
   }, []);
 
   const pickImage = async () => {
-    const hasPermission = await getPermission();
-    if (!hasPermission) return;
+    try {
+      const hasPermission = await getPermission();
+      if (!hasPermission) return;
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.5,
-    });
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.5,
+      });
 
-    if (!result.canceled) {
-      setProfileImage(result.assets[0].uri);
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        setLoading(true);
+        
+        try {
+          const uri = result.assets[0].uri;
+          const response = await fetch(uri);
+          const blob = await response.blob();
+          
+          // Create a reference in Firebase Storage
+          const storageRef = ref(storage, `profile_pictures/${currentUser.uid}`);
+          
+          // Upload image
+          await uploadBytes(storageRef, blob);
+          
+          // Get download URL
+          const downloadURL = await getDownloadURL(storageRef);
+          
+          // Update user document in Firestore
+          const userRef = doc(firestore, "users", currentUser.uid);
+          await updateDoc(userRef, {
+            profilePicture: downloadURL
+          });
+          
+          // Update local state
+          setProfileImage(downloadURL);
+        } catch (error) {
+          console.error("Error uploading image:", error);
+          Alert.alert("Error", "Failed to upload image. Please try again.");
+        } finally {
+          setLoading(false);
+        }
+      }
+    } catch (error) {
+      console.error("Error picking image:", error);
+      Alert.alert("Error", "Failed to select image");
+    }
+  };
+
+  const removeProfilePicture = async () => {
+    try {
+      if (!currentUser || !currentUser.uid) return;
+      
+      setLoading(true);
+      
+      // Update user document in Firestore to remove profile picture
+      const userRef = doc(firestore, "users", currentUser.uid);
+      await updateDoc(userRef, {
+        profilePicture: null
+      });
+      
+      // Update local state
+      setProfileImage(null);
+      
+      Alert.alert("Success", "Profile picture removed");
+    } catch (error) {
+      console.error("Error removing profile picture:", error);
+      Alert.alert("Error", "Failed to remove profile picture");
+    } finally {
+      setLoading(false);
     }
   };
 
   const copyUsername = () => {
+    if (!username) return;
+    
     Clipboard.setString(username);
     
     // Show feedback that username was copied
@@ -97,6 +204,16 @@ const AccountScreen = () => {
     });
   };
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigation.navigate("login");
+    } catch (error) {
+      console.error("Error logging out:", error);
+      Alert.alert("Error", "Failed to log out. Please try again.");
+    }
+  };
+
   const MenuOption = ({ icon, iconLibrary = 'Ionicons', title, onPress, color = colors.text, rightIcon = true }) => {
     const IconComponent = iconLibrary === 'Ionicons' ? Ionicons : Feather;
     
@@ -112,6 +229,28 @@ const AccountScreen = () => {
         {rightIcon && <Ionicons name='chevron-forward-outline' size={22} color={color} />}
       </TouchableOpacity>
     );
+  };
+
+  // Render profile picture or letter avatar
+  const renderProfilePicture = () => {
+    if (profileImage) {
+      return (
+        <Image
+          style={[styles.profileImage, { borderColor: colors.cardBackground }]}
+          source={{ uri: profileImage }}
+        />
+      );
+    } else {
+      return (
+        <LetterAvatar 
+          name={displayName} 
+          size={110} 
+          borderWidth={3} 
+          borderColor={colors.cardBackground}
+          style={styles.profileImage}
+        />
+      );
+    }
   };
 
   if (!fontsLoaded) {
@@ -131,12 +270,13 @@ const AccountScreen = () => {
 
       <View style={styles.profileContainer}>
         <View style={styles.avatarContainer}>
-          <Image
-            style={[styles.profileImage, { borderColor: colors.cardBackground }]}
-            source={{ uri: profileImage }}
-          />
-          <TouchableOpacity style={styles.editImageButton} onPress={pickImage}>
-            <Feather name="camera" size={18} color="white" />
+          {renderProfilePicture()}
+          <TouchableOpacity 
+            style={styles.editImageButton} 
+            onPress={profileImage ? removeProfilePicture : pickImage} 
+            disabled={loading}
+          >
+            <Feather name={profileImage ? "trash-2" : "camera"} size={18} color="white" />
           </TouchableOpacity>
         </View>
 
@@ -199,7 +339,7 @@ const AccountScreen = () => {
           icon="exit-outline" 
           title="Log Out" 
           color={colors.danger} 
-          onPress={() => navigation.navigate('register')}
+          onPress={handleLogout}
           />
       </View>
       
@@ -259,6 +399,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 4,
+    fontFamily: 'Lexend-Bold',
   },
   usernameContainer: {
     position: 'relative',
@@ -274,6 +415,7 @@ const styles = StyleSheet.create({
   usernameText: {
     color: '#2e71e5',
     fontSize: 18,
+    fontFamily: 'Lexend',
   },
   copyIcon: {
     marginLeft: 6,
@@ -293,6 +435,7 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 12,
     fontWeight: '600',
+    fontFamily: 'Lexend-Medium',
   },
   bioContainer: {
     width: '80%',
@@ -306,17 +449,20 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: 'bold',
     marginBottom: 8,
+    fontFamily: 'Lexend-Bold',
   },
   bioText: {
     fontSize: 16,
     lineHeight: 20,
     textAlign: 'center',
+    fontFamily: 'Lexend',
   },
   bioInput: {
     fontSize: 14,
     lineHeight: 20,
     textAlign: 'center',
     padding: 0,
+    fontFamily: 'Lexend',
   },
   menuContainer: {
     paddingHorizontal: 16,
@@ -328,6 +474,7 @@ const styles = StyleSheet.create({
     marginTop: 24,
     marginBottom: 12,
     paddingLeft: 8,
+    fontFamily: 'Lexend-SemiBold',
   },
   menuOption: {
     flexDirection: 'row',
@@ -345,6 +492,7 @@ const styles = StyleSheet.create({
   menuOptionText: {
     fontSize: 16,
     marginLeft: 12,
+    fontFamily: 'Lexend',
   },
   footer: {
     alignItems: 'center',
@@ -352,6 +500,7 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 12,
+    fontFamily: 'Lexend',
   },
 });
 

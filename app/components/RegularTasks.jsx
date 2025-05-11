@@ -20,6 +20,7 @@ const RegularTasks = () => {
     
     const overdueItems = [];
     const dueSoonItems = [];
+    const upcomingItems = []; // Added for upcoming tasks
     const completedItems = [];
     
     tasksData.forEach(task => {
@@ -34,12 +35,16 @@ const RegularTasks = () => {
         overdueItems.push(task);
       } else if (dueDate <= threeDaysFromNow) {
         dueSoonItems.push(task);
+      } else {
+        // Tasks due more than 3 days from now
+        upcomingItems.push(task);
       }
     });
     
     return {
       overdue: overdueItems,
       dueSoon: dueSoonItems,
+      upcoming: upcomingItems, // Added upcoming tasks to returned object
       completed: completedItems
     };
   };
@@ -84,6 +89,28 @@ const RegularTasks = () => {
               <Text style={styles.dueSoonText}>Due Soon</Text>
             </View>
             {categorizedTasks.dueSoon.map(task => (
+              <Task
+                key={task.id}
+                finished={task.completed}
+                name={task.assignedBy}
+                group={task.group}
+                title={task.title}
+                description={task.description}
+                date={task.dueDate.split('T')[0]}
+                clock={task.dueDate.split('T')[1].substring(0, 5)}
+              />
+            ))}
+          </View>
+        )}
+
+        {/* Upcoming Tasks */}
+        {categorizedTasks.upcoming.length > 0 && (
+          <View style={[styles.sectionContainer, { backgroundColor: colors.background2 }]}>
+            <View style={styles.sectionHeader}>
+              <Ionicons name='calendar-outline' color='#42A5F5' size={28}></Ionicons>
+              <Text style={styles.upcomingText}>Upcoming</Text>
+            </View>
+            {categorizedTasks.upcoming.map(task => (
               <Task
                 key={task.id}
                 finished={task.completed}
@@ -175,6 +202,11 @@ const styles = StyleSheet.create({
   },
   dueSoonText: {
     color: '#FFA726',
+    fontSize: 24,
+    fontFamily: 'Lexend-Bold'
+  },
+  upcomingText: {
+    color: '#42A5F5',
     fontSize: 24,
     fontFamily: 'Lexend-Bold'
   },

@@ -4,25 +4,27 @@ import { useNavigation } from '@react-navigation/native'
 import Text from '../CustomText';
 import { useTheme } from '../ThemeContext';
 
-const Account = ({ name, image, text, notification, status }) => {
+const Account = ({ id, name, image, text, notification = 0, status = 'offline' }) => {
   const [imageError, setImageError] = useState(false)
   const { colors } = useTheme();
   
   const randomColor = `hsl(${Math.random() * 360}, 50%, 50%)`
-  const [Notification, hasNotification] = useState(false)
   const navigation = useNavigation();
 
-  useEffect(() => {
-    if(notification !== null){
-        hasNotification(true)
-    }
-  },[])
-  //Change here up when you will import the database.
-
+  console.log(id)
   return (
     <View>
       <TouchableOpacity
-        onPress={() => navigation.navigate("ChatRoom")}
+        onPress={() => {
+          console.log("Navigating to chat with ID:", id);
+          navigation.navigate("ChatRoom", {
+            id: id, // Add the ID parameter here
+            name: name,
+            image: image,
+            status: status === 'online' ? 'Online' : 'Offline'
+          });
+        }}
+        
         style={{
           backgroundColor: colors.background2,
           borderRadius: 20,

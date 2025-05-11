@@ -1,9 +1,9 @@
+// In firebase.js
+
 import { initializeApp } from "firebase/app";
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
-// Analytics needs special handling in React Native
-// import { getAnalytics } from "firebase/analytics";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCKVtLpvZ2hstPE1VWgvGegnvsH_WK_UYg",
@@ -23,8 +23,5 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const firestore = getFirestore(app);
 export const storage = getStorage(app);
-
-// Analytics requires additional setup in React Native
-// const analytics = getAnalytics(app);
 
 export default app;

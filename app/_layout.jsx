@@ -21,14 +21,19 @@ import NotificationsScreen from './components/NotificationsScreen';
 import CreateNewGroup from './components/CreateNewGroup';
 import { FriendsProvider } from './components/FriendsContext';
 import { GroupsProvider } from './components/GroupsContext';
+import { MessagesProvider } from './components/MessageContext'; // Add MessagesProvider
 import TaskMoreDetail from './components/TaskMoreDetail';
 import Test from './components/Test';
 import Appearance from './components/Appearance';
 import { ThemeProvider } from './components/ThemeContext';
 import { useTheme } from './components/ThemeContext';
+import { AuthProvider } from './components/Auth';
+import ChatRoomGroup from './components/ChatRoomGroup';
+import { useFriends } from './components/FriendsContext';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
+
 
 // This is the component for the bottom tabs
 const TabNavigator = () => {
@@ -108,44 +113,56 @@ const _layout = () => {
     return <SplashScreen />;
   }
 
+
   return (
-    <FriendsProvider>
-      <GroupsProvider>
-        <ThemeProvider>
-          <SafeAreaProvider>
-            <StatusBar
-              barStyle="light-content"
-              backgroundColor="transparent"
-              translucent={true}
-            />
-            <NavigationContainer>
-              <Stack.Navigator screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="Introduction" component={Introduction} />
-                <Stack.Screen name="login" component={Login} />
-                <Stack.Screen name="register" component={Register} />
-                <Stack.Screen name="Notifications" options={{ animationTypeForReplace:'pop', animation:'slide_from_right',presentation: 'modal',gestureEnabled:true, gestureDirection:'horizontal'}} component={NotificationsScreen} />
-                <Stack.Screen name="pagechat" component={TabNavigator} />
-                <Stack.Screen name="CreateNewChat" component={CreateNewChat} />
-                <Stack.Screen name="CreateNewGroup" component={CreateNewGroup} />
-                <Stack.Screen name="TaskMoreDetail" component={TaskMoreDetail} />
-                <Stack.Screen name="Test" component={Test} />
-                <Stack.Screen name="Appearance" component={Appearance} />
-                <Stack.Screen 
-                  name="EditProfile" 
-                  component={EditProfileScreen} 
-                  options={{
-                    animation: 'slide_from_right',
-                    gestureEnabled: true,
-                    gestureDirection: 'horizontal'
-                  }}
+    <AuthProvider>
+      <FriendsProvider>
+          <GroupsProvider>
+            <ThemeProvider>
+              <SafeAreaProvider>
+                <StatusBar
+                  barStyle="light-content"
+                  backgroundColor="transparent"
+                  translucent={true}
                 />
-                <Stack.Screen name="ChatRoom" options={{animation:'slide_from_right',gestureEnabled:true,gestureDirection:'horizontal'}} component={ChatRoom} />
-              </Stack.Navigator>
-            </NavigationContainer>
-          </SafeAreaProvider>
-        </ThemeProvider>
-      </GroupsProvider>
-    </FriendsProvider>
+                <NavigationContainer>
+                <Stack.Navigator screenOptions={{ headerShown: false }}>
+                  <Stack.Screen name="Introduction" component={Introduction} />
+                  <Stack.Screen name="login" component={Login} />
+                  <Stack.Screen name="register" component={Register} />
+                  <Stack.Screen name="Notifications" options={{ animationTypeForReplace:'pop', animation:'slide_from_right',presentation: 'modal',gestureEnabled:true, gestureDirection:'horizontal'}} component={NotificationsScreen} />
+                  <Stack.Screen name="pagechat" component={TabNavigator} />
+                  <Stack.Screen name="CreateNewChat" component={CreateNewChat} />
+                  <Stack.Screen name="CreateNewGroup" component={CreateNewGroup} />
+                  <Stack.Screen name="TaskMoreDetail" component={TaskMoreDetail} />
+                  <Stack.Screen name="Test" component={Test} />
+                  <Stack.Screen name="Appearance" component={Appearance} />
+                  <Stack.Screen 
+                    name="EditProfile" 
+                    component={EditProfileScreen} 
+                    options={{
+                      animation: 'slide_from_right',
+                      gestureEnabled: true,
+                      gestureDirection: 'horizontal'
+                    }}
+                    />
+                    <Stack.Screen 
+                      name="ChatRoomGroup" 
+                      component={ChatRoomGroup} 
+                      options={{
+                        animation: 'slide_from_right',
+                        gestureEnabled: true,
+                        gestureDirection: 'horizontal'
+                      }}
+                    />
+                  <Stack.Screen name="ChatRoom" options={{animation:'slide_from_right',gestureEnabled:true,gestureDirection:'horizontal'}} component={ChatRoom} />
+                </Stack.Navigator>
+                </NavigationContainer>
+              </SafeAreaProvider>
+            </ThemeProvider>
+          </GroupsProvider>
+      </FriendsProvider>
+    </AuthProvider>
   );
 };
 

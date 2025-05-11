@@ -12,7 +12,7 @@
       "id": 2,
       "title": "Review Team Presentations",
       "description": "Review and provide feedback on team presentations",
-      "dueDate": "2025-03-27T17:00:00", 
+      "dueDate": "2025-04-30T17:00:00", 
       "assignedBy": "Michael Rodriguez",
       "completed": false
     },
@@ -20,7 +20,7 @@
       "id": 3,
       "title": "Update Documentation",
       "description": "Update the API documentation with new endpoints",
-      "dueDate": "2025-03-10T16:00:00",
+      "dueDate": "2025-04-24T16:00:00",
       "assignedBy": "Alex Kim",
       "completed": false
     },
@@ -28,7 +28,7 @@
       "id": 4,
       "title": "Client Meeting Preparation",
       "description": "Prepare slides for the upcoming client meeting",
-      "dueDate": "2025-03-05T10:00:00",
+      "dueDate": "2025-05-05T10:00:00",
       "assignedBy": "Emma Wilson",
       "completed": false
     },

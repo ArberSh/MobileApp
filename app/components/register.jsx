@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Dimensions, SafeAreaView, StyleSheet, TextInput, TouchableOpacity, View, Alert,ScrollView } from 'react-native';
+import { Dimensions, SafeAreaView, StyleSheet, TextInput, TouchableOpacity, View, ScrollView } from 'react-native';
 import { useFonts } from "expo-font";
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/core';
 import Text from './CustomText';
+import { useAuth } from './Auth';
 
 const { height } = Dimensions.get("window");
 
@@ -13,6 +14,7 @@ const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
   
   // State for validation errors
   const [errors, setErrors] = useState({
@@ -23,6 +25,7 @@ const Register = () => {
   });
 
   const navigation = useNavigation();
+  const { signup } = useAuth();
 
   // Validate form inputs
   const validateForm = () => {
@@ -37,6 +40,12 @@ const Register = () => {
     // Username validation
     if (!username.trim()) {
       newErrors.username = 'Username is required';
+      isValid = false;
+    } else if (username.length < 3) {
+      newErrors.username = 'Username must be at least 3 characters long';
+      isValid = false;
+    } else if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+      newErrors.username = 'Username can only contain letters, numbers and underscores';
       isValid = false;
     }
 
@@ -69,22 +78,53 @@ const Register = () => {
   };
 
   // Handle registration
-  const handleSignUp = () => {
+  const handleSignUp = async () => {
     if (validateForm()) {
-      // This is where Firebase registration will go
-      console.log('Form is valid, proceed with registration');
-      // For now, navigate to the chat page
-      navigation.navigate('pagechat');
-    } else {
-      // Display an alert with all validation errors
-      const errorMessages = Object.values(errors).filter(err => err !== '');
-      // if (errorMessages.length > 0) {
-      //   Alert.alert(
-      //     "Registration Error",
-      //     errorMessages.join('\n'),
-      //     [{ text: "OK" }]
-      //   );
-      // }
+      try {
+        setLoading(true);
+        await signup(email, password, username);
+        // Navigate directly without Alert
+        navigation.navigate('pagechat');
+      } catch (error) {
+        let errorMessage = "Failed to create an account.";
+        
+        if (error.code === 'auth/email-already-in-use') {
+          setErrors(prev => ({ ...prev, email: "Email is already in use." }));
+        } else if (error.code === 'auth/invalid-email') {
+          setErrors(prev => ({ ...prev, email: "Invalid email format." }));
+        } else if (error.code === 'auth/weak-password') {
+          setErrors(prev => ({ ...prev, password: "Password is too weak." }));
+        } else if (error.code === 'auth/username-already-in-use') {
+          setErrors(prev => ({ ...prev, username: "Username is already taken. Please choose another." }));
+        }
+      
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  // Handle input changes
+  const handleInputChange = (field, value) => {
+    // Update the field value
+    switch (field) {
+      case 'username':
+        setUsername(value);
+        break;
+      case 'email':  
+        setEmail(value);
+        break;
+      case 'password':
+        setPassword(value);
+        break;
+      case 'confirmPassword':
+        setConfirmPassword(value);
+        break;
+    }
+    
+    // Clear the error for this field if there is one
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
     }
   };
 
@@ -109,7 +149,8 @@ const Register = () => {
           style={styles.input}
           accessibilityLabel="Enter your username"
           value={username}
-          onChangeText={setUsername}
+          onChangeText={(text) => handleInputChange('username', text)}
+          autoCapitalize="none"
         />
         {renderErrorMessage(errors.username)}
         
@@ -119,7 +160,7 @@ const Register = () => {
           style={styles.input}
           accessibilityLabel="Enter your email"
           value={email}
-          onChangeText={setEmail}
+          onChangeText={(text) => handleInputChange('email', text)}
           keyboardType="email-address"
           autoCapitalize="none"
         />
@@ -131,7 +172,7 @@ const Register = () => {
           style={styles.input}
           accessibilityLabel="Enter your password"
           value={password}
-          onChangeText={setPassword}
+          onChangeText={(text) => handleInputChange('password', text)}
           secureTextEntry
         />
         {renderErrorMessage(errors.password)}
@@ -142,7 +183,7 @@ const Register = () => {
           style={styles.input}
           accessibilityLabel="Confirm your password"
           value={confirmPassword}
-          onChangeText={setConfirmPassword}
+          onChangeText={(text) => handleInputChange('confirmPassword', text)}
           secureTextEntry
         />
         {renderErrorMessage(errors.confirmPassword)}
@@ -151,11 +192,12 @@ const Register = () => {
         <TouchableOpacity 
           style={{
             padding: 16,
-            backgroundColor: '#00c9bd',
+            backgroundColor: loading ? '#8ba5c4' : '#7a92af',
             marginVertical: 24,
             borderRadius: 8,
           }} 
           onPress={handleSignUp}
+          disabled={loading}
         >
           <Text
             style={{
@@ -164,7 +206,7 @@ const Register = () => {
               fontSize: 20,
             }}
           >
-            Sign up
+            {loading ? "Creating Account..." : "Sign up"}
           </Text>
         </TouchableOpacity>
         
@@ -186,61 +228,6 @@ const Register = () => {
             Already have an account
           </Text>
         </TouchableOpacity>
-
-        <View 
-          style={{
-            marginVertical: 16
-          }}
-        >
-          <Text
-            style={{
-              color: '#00c9bd',
-              textAlign: 'center',
-              fontSize: 16,
-            }}
-          >
-            Or continue with
-          </Text>
-        </View>
-        
-        <View
-          style={{
-            marginTop: 8,
-            flexDirection: 'row',
-            justifyContent: 'center',
-          }}
-        >
-          <TouchableOpacity
-            style={{
-              padding: 8,
-              backgroundColor: '#1E1E1E',
-              borderRadius: 4,
-              marginHorizontal: 16
-            }}
-          >
-            <Ionicons name="logo-google" size={32} color="#00c9bd" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={{
-              padding: 8,
-              backgroundColor: '#1E1E1E',
-              borderRadius: 4,
-              marginHorizontal: 16
-            }}
-          >
-            <Ionicons name="logo-facebook" size={32} color="#00c9bd" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={{
-              padding: 8,
-              backgroundColor: '#1E1E1E',
-              borderRadius: 4,
-              marginHorizontal: 16
-            }}
-          >
-            <Ionicons name="logo-apple" size={32} color="#00c9bd" />
-          </TouchableOpacity>
-        </View>
       </View>
     </ScrollView>
   );
@@ -258,7 +245,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   title: {
-    color: "#00c9bd",
+    color: "#7a92af",
     fontFamily: "Lexend-Bold",
     fontSize: 30,
   },

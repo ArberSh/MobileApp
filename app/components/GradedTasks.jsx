@@ -83,7 +83,7 @@ const GradedTasks = () => {
             ]}
             onPress={() => setSelectedGroup('all')}
           >
-            <Text style={[styles.filterText, { color: 'white'}]}>All Groups</Text>
+            <Text style={[styles.filterText, { color: colors.text}]}>All Groups</Text>
           </TouchableOpacity>
           
           {groups.map(group => (
@@ -98,7 +98,7 @@ const GradedTasks = () => {
               ]}
               onPress={() => setSelectedGroup(group)}
             >
-              <Text style={[styles.filterText, { color: 'white' }]}>{group}</Text>
+              <Text style={[styles.filterText, { color: colors.text }]}>{group}</Text>
             </TouchableOpacity>
           ))}
         </ScrollView>

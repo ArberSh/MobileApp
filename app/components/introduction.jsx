@@ -57,7 +57,7 @@ const Introduction = () => {
           <Text
             style={{
               fontSize: 36,
-              color: "#00c9bd",
+              color: "#7a92af",
               fontFamily: "Lexend-Bold",
               textAlign: "center",
             }}
@@ -88,7 +88,7 @@ const Introduction = () => {
           <TouchableOpacity
             onPress={() => navigation.navigate("login")}
             style={{
-              backgroundColor: "#00c9bd",
+              backgroundColor: "#7a92af",
               paddingVertical: 6,
               paddingHorizontal: 8,
               width: "46%",

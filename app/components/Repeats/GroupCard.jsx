@@ -2,10 +2,23 @@ import { StyleSheet, TouchableOpacity, View, Image } from 'react-native'
 import React from 'react'
 import Text from '../CustomText';
 import { useTheme } from '../ThemeContext';
+import { useNavigation } from '@react-navigation/native';
 
-const GroupCard = ({name, photo, description, color}) => {
+const GroupCard = ({name, photo, description, color, id}) => {
   const { colors } = useTheme();
+  const navigation = useNavigation();
   const firstLetter = name ? name.charAt(0).toUpperCase() : '?';
+  
+  // Create a handler function for navigation
+  const handlePress = () => {
+    navigation.navigate('ChatRoomGroup', {
+      groupId: id,
+      name: name,
+      description: description,
+      photo: photo,
+      color: color
+    });
+  };
 
   const darkenColor = (color) => {
     // If we have a hex color
@@ -15,7 +28,7 @@ const GroupCard = ({name, photo, description, color}) => {
       let g = parseInt(color.slice(3, 5), 16);
       let b = parseInt(color.slice(5, 7), 16);
       
-      // Darken by reducing RGB values by 30%
+      // Darken by reducing RGB values by 20%
       r = Math.max(0, Math.floor(r * 0.8));
       g = Math.max(0, Math.floor(g * 0.8));
       b = Math.max(0, Math.floor(b * 0.8));
@@ -35,11 +48,14 @@ const GroupCard = ({name, photo, description, color}) => {
   const darkColor = darkenColor(originalColor);
 
   return (
-    <TouchableOpacity style={{
-      height: 120,
-      borderRadius: 16,
-      marginTop: 10,
-    }}>
+    <TouchableOpacity 
+      onPress={handlePress}
+      style={{
+        height: 120,
+        borderRadius: 16,
+        marginTop: 10,
+      }}
+    >
       <View style={{
         backgroundColor: color,
         height: '59%',
